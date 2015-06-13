@@ -246,13 +246,18 @@ namespace backend
         };
 
     public:
+        /* Forwarding with Karma doesn't work with a single entry. If the
+           single entry is a mutable reference (l-value or r-value) it tries to
+           create a reference from a const-reference. Theres no need for
+           mutable references until %n is supported, which will be tricky
+           with karma anyway. */
         template <typename IR, typename Iterator, typename... Args>
-        static bool generate(Iterator &&iterator, Args &&... args)
+        static bool generate(Iterator &&iterator, const Args&... args)
         {
             return boost::spirit::karma::generate(std::forward<Iterator>(
                                                       iterator),
                                                   generate_tree<IR>::apply(),
-                                                  std::tie(args...));
+                                                  std::tie<const Args&...>(args...));
         }
     };
 } // convert

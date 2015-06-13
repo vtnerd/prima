@@ -93,7 +93,7 @@ namespace frontend
                     constexpr const static bool is_type_field =
                         has_field_<field>(typename State::type{});
                     static_assert(is_width_field != is_type_field,
-                                  "invalid field");
+                                  "invalid field for type");
 
                 public:
                     using type =
