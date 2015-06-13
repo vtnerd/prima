@@ -18,7 +18,7 @@ namespace
 
 int main()
 {
-//    BOOST_TEST_EQ("<-->", generate<PRIMA_FMT("<-->")>());
+    BOOST_TEST_EQ("<-->", generate<PRIMA_FMT("<-->")>());
 
     BOOST_TEST_EQ("0", generate<PRIMA_FMT("%u")>(0u));
     BOOST_TEST_EQ("100", generate<PRIMA_FMT("%u")>(100u));

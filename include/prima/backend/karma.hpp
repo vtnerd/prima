@@ -168,8 +168,7 @@ namespace backend
             static auto apply()
             {
                 constexpr const static char literal_[] = {Characters..., 0};
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::lit(literal_));
+                return literal_;
             }
         };
 
@@ -246,18 +245,26 @@ namespace backend
         };
 
     public:
+        template <typename IR, typename Iterator>
+        static bool generate(Iterator &&iterator)
+        {
+            return boost::spirit::karma::generate(
+                std::forward<Iterator>(iterator), generate_tree<IR>::apply());
+        }
+
         /* Forwarding with Karma doesn't work with a single entry. If the
            single entry is a mutable reference (l-value or r-value) it tries to
            create a reference from a const-reference. Theres no need for
            mutable references until %n is supported, which will be tricky
            with karma anyway. */
-        template <typename IR, typename Iterator, typename... Args>
-        static bool generate(Iterator &&iterator, const Args&... args)
+        template <typename IR, typename Iterator, typename Arg1, typename... Args>
+        static bool
+        generate(Iterator &&iterator, const Arg1 &arg1, const Args &... args)
         {
-            return boost::spirit::karma::generate(std::forward<Iterator>(
-                                                      iterator),
-                                                  generate_tree<IR>::apply(),
-                                                  std::tie<const Args&...>(args...));
+            return boost::spirit::karma::generate(
+                std::forward<Iterator>(iterator),
+                generate_tree<IR>::apply(),
+                std::tie<const Arg1 &, const Args &...>(arg1, args...));
         }
     };
 } // convert
