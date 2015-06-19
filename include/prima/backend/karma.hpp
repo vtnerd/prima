@@ -53,9 +53,179 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::types::numeric::real::float_<Fields>>
         {
+            using representation = ir::get_field_t<
+                Fields,
+                ir::output::types::numeric::real::fields::representation>;
+
+            enum class rep_type : std::uint8_t
+            {
+                fixed = 0,
+                scientific,
+                optimal
+            };
+
+            template <char Dot>
+            constexpr static rep_type get_rep_type(
+                const ir::output::types::numeric::real::values::fixed<Dot> &)
+            {
+                return rep_type::fixed;
+            }
+
+            template <char Scientific>
+            constexpr static rep_type get_rep_type(
+                const ir::output::types::numeric::real::values::scientific<
+                    Scientific> &)
+            {
+                return rep_type::scientific;
+            }
+
+            template <char Dot, char Scientific>
+            constexpr static rep_type
+            get_rep_type(const ir::output::types::numeric::real::values::
+                             optimal<Dot, Scientific> &)
+            {
+                return rep_type::optimal;
+            }
+
+            constexpr static rep_type get_rep_type()
+            {
+                return get_rep_type(representation{});
+            }
+
+            constexpr static bool use_alternate_format()
+            {
+                return ir::get_field_value<
+                    Fields,
+                    ir::output::types::numeric::fields::use_alternate_format>();
+            }
+
+            struct real_policy : boost::spirit::karma::real_policies<double>
+            {
+                using base = boost::spirit::karma::real_policies<double>;
+
+                template <typename OutputIterator>
+                static bool dot(OutputIterator &sink,
+                                const double fractional,
+                                const unsigned precision)
+                {
+                    namespace karma = boost::spirit::karma;
+
+                    switch (get_rep_type())
+                    {
+                    default:
+                    case rep_type::fixed:
+                    case rep_type::scientific:
+                        if (use_alternate_format() || 0 < precision)
+                        {
+                            return karma::char_inserter<>::call(
+                                sink, representation::value);
+                        }
+                        break;
+
+                    case rep_type::optimal:
+                        if (use_alternate_format() ||
+                            (1.0f > fractional && 0.0f <= fractional))
+                        {
+                            return karma::char_inserter<>::call(
+                                sink, representation::value);
+                        }
+                        break;
+                    }
+
+                    return true;
+                }
+
+                static int floatfield(const double value)
+                {
+                    switch (get_rep_type())
+                    {
+                    default:
+                    case rep_type::fixed:
+                        return fmtflags::fixed;
+
+                    case rep_type::scientific:
+                        return fmtflags::scientific;
+
+                    case rep_type::optimal:
+                        if (value >= 0.0001 &&
+                            value <= std::pow(10, precision(value)))
+                        {
+                            return fmtflags::fixed;
+                        }
+                        else
+                        {
+                            return fmtflags::scientific;
+                        }
+                    }
+                }
+
+                template <typename OutputIterator>
+                static bool integer_part(OutputIterator &sink,
+                                         const double n,
+                                         const bool sign,
+                                         const bool)
+                {
+                    namespace karma = boost::spirit::karma;
+
+                    /* Karma doesn't do what we want for 0 values (doesn't print
+                     * '+'), and doesn't add spaces on positive values, so do
+                     * the sign and blank printing for karma. */
+                    constexpr const bool blank_on_positive =
+                        ir::get_field_value<Fields,
+                                            ir::output::types::numeric::fields::
+                                                extra_blank_on_positive>();
+                    constexpr const bool always_print_sign = ir::get_field_value<
+                        Fields,
+                        ir::output::types::numeric::fields::always_print_sign>();
+
+                    static_assert(!(blank_on_positive && always_print_sign),
+                                  "invalid ir");
+
+                    if (blank_on_positive && !sign)
+                    {
+                        if (!karma::char_inserter<>::call(sink, ' '))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (always_print_sign && !sign)
+                    {
+                        if (!karma::char_inserter<>::call(sink, '+'))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return base::integer_part(sink, n, sign, false);
+                }
+
+                static constexpr unsigned precision(double)
+                {
+                    return ir::get_field_value<
+                        Fields,
+                        ir::output::types::fields::precision>();
+                }
+
+                static bool trailing_zeros(double)
+                {
+                    switch (get_rep_type())
+                    {
+                    default:
+                    case rep_type::fixed:
+                    case rep_type::scientific:
+                        return true;
+
+                    case rep_type::optimal:
+                        return !use_alternate_format();
+                    }
+                }
+            };
+
             static auto apply()
             {
-                return boost::proto::deep_copy(boost::spirit::karma::float_);
+                using float_generator =
+                    boost::spirit::karma::real_generator<double, real_policy>;
+                return boost::proto::deep_copy(float_generator{});
             }
         };
 
@@ -90,6 +260,10 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::types::numeric::unsigned_<Fields>>
         {
+            // \todo Remove code for '+' and ' ' flags, which are ignored by
+            // unsigned types
+            // \todo Detect the above in the frontend - which already needs an
+            // overall
             using always_print_sign = ir::get_field_t<
                 Fields,
                 ir::output::types::numeric::fields::always_print_sign>;
