@@ -50,8 +50,7 @@ namespace frontend
 
                 struct width_with_type
                 {
-                    using type =
-                        oir::format::width<typename Width::fields, Type>;
+                    using type = oir::width<typename Width::fields, Type>;
                 };
             };
 
@@ -112,9 +111,8 @@ namespace frontend
                 using precision_uint = meta::at_ct<Sequence, 2>;
                 using output_type = meta::at_ct<Sequence, 3>;
 
-                static_assert(
-                    has_field_<oir::types::fields::precision>(output_type{}),
-                    "invalid type field");
+                static_assert(has_field_<oir::fields::precision>(output_type{}),
+                              "invalid type field");
 
                 using normalized_precision =
                     meta::if_t<meta::is_void_<precision_uint>,
@@ -128,8 +126,8 @@ namespace frontend
                                output_type,
                                ir::manip::update_field<
                                    typename output_type::fields,
-                                   oir::types::fields::precision,
-                                   oir::types::values::precision<
+                                   oir::fields::precision,
+                                   oir::values::precision<
                                        normalized_precision::value>>>>;
 
                 using normalized_width = meta::if_t<meta::is_void_<width_uint>,
@@ -164,59 +162,42 @@ namespace frontend
             mp::always<mp::one_of<mp::lit_c<'c'>, mp::lit_c<'d'>, mp::lit_c<'i'>>,
                        oir::make::int_<>>,
             mp::always_c<'a',
-                         oir::make::lower_case<oir::make::float_<
-                             oir::types::numeric::real::values::fixed<'.'>,
-                             oir::types::numeric::values::radix<16>>>>,
+                         oir::make::float_<oir::values::fixed<'.'>,
+                                           oir::values::radix<16>>>,
             mp::always_c<'A',
-                         oir::make::upper_case<oir::make::float_<
-                             oir::types::numeric::real::values::fixed<'.'>,
-                             oir::types::numeric::values::radix<16>>>>,
-            mp::always_c<'e',
-                         oir::make::float_<
-                             oir::types::numeric::real::values::scientific<'e'>>>,
+                         oir::make::upper_case<
+                             oir::make::float_<oir::values::fixed<'.'>,
+                                               oir::values::radix<16>>>>,
+            mp::always_c<'e', oir::make::float_<oir::values::scientific<'e'>>>,
             mp::always_c<'E',
-                         oir::make::float_<
-                             oir::types::numeric::real::values::scientific<'E'>>>,
-            mp::always_c<'f',
-                         oir::make::float_<
-                             oir::types::numeric::real::values::fixed<'.'>>>,
-            mp::always_c<'g',
-                         oir::make::float_<oir::types::numeric::real::values::
-                                               optimal<'.', 'e'>>>,
-            mp::always_c<'G',
-                         oir::make::float_<oir::types::numeric::real::values::
-                                               optimal<'.', 'e'>>>,
+                         oir::make::upper_case<
+                             oir::make::float_<oir::values::scientific<'E'>>>>,
+            mp::always_c<'f', oir::make::float_<oir::values::fixed<'.'>>>,
+            mp::always_c<'g', oir::make::float_<oir::values::optimal<'.', 'e'>>>,
+            mp::always_c<'G', oir::make::float_<oir::values::optimal<'.', 'e'>>>,
             mp::always_c<'s', oir::make::string>,
-            mp::always_c<
-                'o',
-                oir::make::unsigned_<oir::types::numeric::values::radix<8>>>,
+            mp::always_c<'o', oir::make::unsigned_<oir::values::radix<8>>>,
             mp::always_c<'u', oir::make::unsigned_<>>,
-            mp::always_c<'x',
-                         oir::make::lower_case<oir::make::unsigned_<
-                             oir::types::numeric::values::radix<16>>>>,
+            mp::always_c<'x', oir::make::unsigned_<oir::values::radix<16>>>,
             mp::always_c<'X',
-                         oir::make::upper_case<oir::make::unsigned_<
-                             oir::types::numeric::values::radix<16>>>>>;
+                         oir::make::upper_case<
+                             oir::make::unsigned_<oir::values::radix<16>>>>>;
 
         using flags = mp::any<mp::one_of<
             mp::always_c<
                 '#',
-                meta::vector<oir::types::numeric::fields::use_alternate_format,
-                             meta::true_>>,
+                meta::vector<oir::fields::use_alternate_format, meta::true_>>,
             mp::always_c<
                 ' ',
-                meta::vector<oir::types::numeric::fields::extra_blank_on_positive,
-                             meta::true_>>,
+                meta::vector<oir::fields::extra_blank_on_positive, meta::true_>>,
             mp::always_c<
                 '+',
-                meta::vector<oir::types::numeric::fields::always_print_sign,
-                             meta::true_>>,
+                meta::vector<oir::fields::always_print_sign, meta::true_>>,
+            mp::always_c<'-',
+                         meta::vector<oir::fields::left_justified, meta::true_>>,
             mp::always_c<
-                '-',
-                meta::vector<oir::format::fields::left_justified, meta::true_>>,
-            mp::always_c<'0',
-                         meta::vector<oir::format::fields::pad_character,
-                                      meta::char_<'0'>>>>>;
+                '0',
+                meta::vector<oir::fields::pad_character, meta::char_<'0'>>>>>;
         using width = mp::one_of<int_, mp::return_<meta::void_>>;
         using precision = mp::one_of<mp::last_of<mp::lit_c<'.'>, int_>,
                                      mp::return_<meta::void_>>;

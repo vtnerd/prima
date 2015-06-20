@@ -31,17 +31,7 @@ namespace backend
         template <typename Type> struct generate_tree;
 
         template <typename Inner>
-        struct generate_tree<ir::output::format::lower_case<Inner>>
-        {
-            static auto apply()
-            {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::lower[generate_tree<Inner>::apply()]);
-            }
-        };
-
-        template <typename Inner>
-        struct generate_tree<ir::output::format::upper_case<Inner>>
+        struct generate_tree<ir::output::upper_case<Inner>>
         {
             static auto apply()
             {
@@ -51,11 +41,10 @@ namespace backend
         };
 
         template <typename Fields>
-        struct generate_tree<ir::output::types::numeric::real::float_<Fields>>
+        struct generate_tree<ir::output::float_<Fields>>
         {
-            using representation = ir::get_field_t<
-                Fields,
-                ir::output::types::numeric::real::fields::representation>;
+            using representation =
+                ir::get_field_t<Fields, ir::output::fields::representation>;
 
             enum class rep_type : std::uint8_t
             {
@@ -65,24 +54,22 @@ namespace backend
             };
 
             template <char Dot>
-            constexpr static rep_type get_rep_type(
-                const ir::output::types::numeric::real::values::fixed<Dot> &)
+            constexpr static rep_type
+            get_rep_type(const ir::output::values::fixed<Dot> &)
             {
                 return rep_type::fixed;
             }
 
             template <char Scientific>
-            constexpr static rep_type get_rep_type(
-                const ir::output::types::numeric::real::values::scientific<
-                    Scientific> &)
+            constexpr static rep_type
+            get_rep_type(const ir::output::values::scientific<Scientific> &)
             {
                 return rep_type::scientific;
             }
 
             template <char Dot, char Scientific>
             constexpr static rep_type
-            get_rep_type(const ir::output::types::numeric::real::values::
-                             optimal<Dot, Scientific> &)
+            get_rep_type(const ir::output::values::optimal<Dot, Scientific> &)
             {
                 return rep_type::optimal;
             }
@@ -96,7 +83,7 @@ namespace backend
             {
                 return ir::get_field_value<
                     Fields,
-                    ir::output::types::numeric::fields::use_alternate_format>();
+                    ir::output::fields::use_alternate_format>();
             }
 
             struct real_policy : boost::spirit::karma::real_policies<double>
@@ -171,12 +158,13 @@ namespace backend
                      * '+'), and doesn't add spaces on positive values, so do
                      * the sign and blank printing for karma. */
                     constexpr const bool blank_on_positive =
-                        ir::get_field_value<Fields,
-                                            ir::output::types::numeric::fields::
-                                                extra_blank_on_positive>();
-                    constexpr const bool always_print_sign = ir::get_field_value<
-                        Fields,
-                        ir::output::types::numeric::fields::always_print_sign>();
+                        ir::get_field_value<
+                            Fields,
+                            ir::output::fields::extra_blank_on_positive>();
+                    constexpr const bool always_print_sign =
+                        ir::get_field_value<
+                            Fields,
+                            ir::output::fields::always_print_sign>();
 
                     static_assert(!(blank_on_positive && always_print_sign),
                                   "invalid ir");
@@ -201,9 +189,8 @@ namespace backend
 
                 static constexpr unsigned precision(double)
                 {
-                    return ir::get_field_value<
-                        Fields,
-                        ir::output::types::fields::precision>();
+                    return ir::get_field_value<Fields,
+                                               ir::output::fields::precision>();
                 }
 
                 static bool trailing_zeros(double)
@@ -230,68 +217,56 @@ namespace backend
         };
 
         template <typename Fields>
-        struct generate_tree<ir::output::types::numeric::int_<Fields>>
+        struct generate_tree<ir::output::int_<Fields>>
         {
             static auto apply()
             {
-                namespace numeric_fields = ir::output::types::numeric::fields;
-                static_assert(!ir::get_field_value<
-                                  Fields,
-                                  numeric_fields::extra_blank_on_positive>(),
-                              "' ' flag not yet supported for integers");
+                namespace fields = ir::output::fields;
+
                 static_assert(
                     !ir::get_field_value<Fields,
-                                         numeric_fields::use_alternate_format>(),
+                                         fields::extra_blank_on_positive>(),
+                    "' ' flag not yet supported for integers");
+                static_assert(
+                    !ir::get_field_value<Fields, fields::use_alternate_format>(),
                     "'#' flag not yet supported for integers");
-                static_assert(ir::get_field_value<
-                                  Fields,
-                                  ir::output::types::fields::precision>() == 1,
-                              "only a precision of 1 is currently supported "
-                              "for integers");
+                static_assert(
+                    ir::get_field_value<Fields, fields::precision>() == 1,
+                    "only a precision of 1 is currently supported "
+                    "for integers");
                 using int_generator = boost::spirit::karma::int_generator<
                     int,
-                    ir::get_field_value<Fields, numeric_fields::radix>(),
-                    ir::get_field_value<Fields,
-                                        numeric_fields::always_print_sign>()>;
+                    ir::get_field_value<Fields, fields::radix>(),
+                    ir::get_field_value<Fields, fields::always_print_sign>()>;
                 return boost::proto::deep_copy(int_generator{});
             }
         };
 
         template <typename Fields>
-        struct generate_tree<ir::output::types::numeric::unsigned_<Fields>>
+        struct generate_tree<ir::output::unsigned_<Fields>>
         {
-            // \todo Remove code for '+' and ' ' flags, which are ignored by
-            // unsigned types
-            // \todo Detect the above in the frontend - which already needs an
-            // overall
-            using always_print_sign = ir::get_field_t<
-                Fields,
-                ir::output::types::numeric::fields::always_print_sign>;
             using precision =
-                ir::get_field_t<Fields, ir::output::types::fields::precision>;
+                ir::get_field_t<Fields, ir::output::fields::precision>;
 
             static_assert(precision::value != 0,
                           "precision of 0 is not currently allowed for "
-                          "unsigned "
-                          "integers");
+                          "unsigned integers");
             static_assert(
-                !ir::get_field_value<
-                    Fields,
-                    ir::output::types::numeric::fields::use_alternate_format>(),
+                !ir::get_field_value<Fields,
+                                     ir::output::fields::use_alternate_format>(),
                 "'#' flag not yet supported for unsigned integers");
 
             static auto print_number()
             {
-                constexpr auto radix = ir::get_field_value<
-                    Fields,
-                    ir::output::types::numeric::fields::radix>();
+                constexpr auto radix =
+                    ir::get_field_value<Fields, ir::output::fields::radix>();
                 using uint_generator =
                     boost::spirit::karma::uint_generator<unsigned, radix>;
                 return boost::proto::deep_copy(uint_generator{});
             }
 
             static auto with_precision(
-                const ir::output::types::values::precision<1> &)
+                const ir::output::values::precision<1> &)
             {
                 return print_number();
             }
@@ -304,42 +279,16 @@ namespace backend
                                                       '0')[print_number()]);
             }
 
-            static auto print_sign(const meta::true_ &)
-            {
-                return boost::proto::deep_copy(boost::spirit::karma::lit("+")
-                                               << with_precision(precision{}));
-            }
-
-            static auto print_sign(const meta::false_ &)
-            {
-                return with_precision(precision{});
-            }
-
-            static auto print_extra_blank(const meta::true_ &)
-            {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::lit(" ")
-                    << print_sign(always_print_sign{}));
-            }
-
-            static auto print_extra_blank(const meta::false_ &)
-            {
-                return print_sign(always_print_sign{});
-            }
-
             static auto apply()
             {
-                return print_extra_blank(
-                    ir::get_field_t<Fields,
-                                    ir::output::types::numeric::fields::
-                                        extra_blank_on_positive>{});
+                return with_precision(precision{});
             }
         };
 
         template <char... Characters>
         struct generate_tree<ir::literal<Characters...>>
         {
-            static auto apply()
+            static const char* apply()
             {
                 constexpr const static char literal_[] = {Characters..., 0};
                 return literal_;
@@ -347,7 +296,7 @@ namespace backend
         };
 
         template <typename Fields>
-        struct generate_tree<ir::output::types::string<Fields>>
+        struct generate_tree<ir::output::string<Fields>>
         {
             static auto with_precision(const meta::void_ &)
             {
@@ -356,7 +305,7 @@ namespace backend
 
             template <unsigned Value>
             static auto with_precision(
-                const ir::output::types::values::precision<Value> &)
+                const ir::output::values::precision<Value> &)
             {
                 return boost::proto::deep_copy(boost::spirit::karma::maxwidth(
                     Value)[boost::spirit::karma::string]);
@@ -365,8 +314,7 @@ namespace backend
             static auto apply()
             {
                 return with_precision(
-                    ir::get_field_t<Fields,
-                                    ir::output::types::fields::precision>{});
+                    ir::get_field_t<Fields, ir::output::fields::precision>{});
             }
         };
 
@@ -382,10 +330,10 @@ namespace backend
         };
 
         template <typename Fields, typename Inner>
-        struct generate_tree<ir::output::format::width<Fields, Inner>>
+        struct generate_tree<ir::output::width<Fields, Inner>>
         {
             static auto with_justification(
-                const ir::output::format::values::left_justified &,
+                const ir::output::values::left_justified &,
                 const unsigned width)
             {
                 return boost::proto::deep_copy(boost::spirit::karma::left_align(
@@ -393,7 +341,7 @@ namespace backend
             }
 
             static auto with_justification(
-                const ir::output::format::values::right_justified &,
+                const ir::output::values::right_justified &,
                 const unsigned width)
             {
                 return boost::proto::deep_copy(
@@ -403,14 +351,14 @@ namespace backend
 
             static auto apply()
             {
-                namespace fmt_fields = ir::output::format::fields;
+                namespace fields = ir::output::fields;
 
                 using justification =
-                    ir::get_field_t<Fields, fmt_fields::left_justified>;
+                    ir::get_field_t<Fields, fields::left_justified>;
                 constexpr const auto width =
-                    ir::get_field_value<Fields, fmt_fields::width>();
+                    ir::get_field_value<Fields, fields::width>();
                 constexpr const auto pad =
-                    ir::get_field_value<Fields, fmt_fields::pad_character>();
+                    ir::get_field_value<Fields, fields::pad_character>();
                 static_assert(pad == ' ',
                               "'0' flag is currently not supported");
 

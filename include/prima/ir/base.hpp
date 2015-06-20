@@ -17,10 +17,22 @@ namespace ir
         using right = Right;
     };
 
-    constexpr bool is_field(...)
+    template <template <unsigned> class Field> struct is_field_func
     {
-        return false;
-    }
+        template <typename> struct apply : meta::false_
+        {
+        };
+
+        template <unsigned N> struct apply<Field<N>> : meta::true_
+        {
+        };
+    };
+
+    template <typename Test, template <unsigned> class Field>
+    using is_field = meta::bind<is_field_func<Field>, Test>;
+
+    template <typename Test, template <unsigned> class... Fields>
+    using is_any_field = meta::or_<is_field<Test, Fields>...>;
 
     template <typename> constexpr bool has_field(...)
     {

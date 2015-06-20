@@ -13,46 +13,41 @@ namespace ir
     {
         namespace make
         {
-            template <typename Radix = types::numeric::values::radix<10>>
-            using int_ = types::numeric::int_<
-                meta::vector<types::values::precision<1>,
-                             Radix,
-                             types::numeric::values::only_print_negative_sign,
-                             types::numeric::values::no_extra_blank_on_positive,
-                             types::numeric::values::use_standard_format>>;
-
-            template <typename Inner>
-            using lower_case = format::lower_case<Inner>;
-
             template <typename Representation,
-                      typename Radix = types::numeric::values::radix<10>>
-            using float_ = types::numeric::real::float_<
-                meta::vector<types::values::precision<6>,
+                      typename Radix = values::radix<10>>
+            using float_ = ::prima::ir::output::float_<
+                meta::vector<values::precision<6>,
                              Radix,
-                             types::numeric::values::only_print_negative_sign,
-                             types::numeric::values::no_extra_blank_on_positive,
-                             types::numeric::values::use_standard_format,
+                             values::use_standard_format,
+                             values::only_print_negative_sign,
+                             values::no_extra_blank_on_positive,
                              Representation>>;
 
-            using string = types::string<meta::vector<meta::void_>>;
+            template <typename Radix = values::radix<10>>
+            using int_ = ::prima::ir::output::int_<
+                meta::vector<values::precision<1>,
+                             Radix,
+                             values::use_standard_format,
+                             values::only_print_negative_sign,
+                             values::no_extra_blank_on_positive>>;
+
+            using string = ::prima::ir::output::string<meta::vector<meta::void_>>;
 
             template <typename Inner>
-            using upper_case = format::upper_case<Inner>;
+            using upper_case = ::prima::ir::output::upper_case<Inner>;
 
-            template <typename Radix = types::numeric::values::radix<10>>
-            using unsigned_ = types::numeric::unsigned_<
-                meta::vector<types::values::precision<1>,
+            template <typename Radix = values::radix<10>>
+            using unsigned_ = ::prima::ir::output::unsigned_<
+                meta::vector<values::precision<1>,
                              Radix,
-                             types::numeric::values::only_print_negative_sign,
-                             types::numeric::values::no_extra_blank_on_positive,
-                             types::numeric::values::use_standard_format>>;
+                             values::use_standard_format>>;
 
             template <typename Width, typename Inner>
-            using width =
-                format::width<meta::vector<format::values::right_justified,
-                                           format::values::pad_character<' '>,
-                                           format::values::width<Width::value>>,
-                              Inner>;
+            using width = ::prima::ir::output::width<
+                meta::vector<values::right_justified,
+                             values::pad_character<' '>,
+                             values::width<Width::value>>,
+                Inner>;
 
         } // make
     }     // output

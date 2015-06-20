@@ -9,142 +9,109 @@ namespace ir
 {
     namespace output
     {
-        namespace format
+        namespace fields
         {
             template <unsigned Value>
             struct format_field : meta::unsigned_<Value>
             {
             };
 
-            template <unsigned Value>
-            constexpr bool is_field(const format_field<Value> &)
-            {
-                return true;
-            }
+            using left_justified = format_field<0>;
+            using pad_character = format_field<1>;
+            using width = format_field<2>;
 
-            namespace fields
-            {
-                using left_justified = format_field<0>;
-                using pad_character = format_field<1>;
-                using width = format_field<2>;
-            }
 
-            namespace values
-            {
-                using left_justified = meta::true_;
-                using right_justified = meta::false_;
-
-                template <char Value> struct pad_character : meta::char_<Value>
-                {
-                };
-
-                template <char Value> struct width : meta::unsigned_<Value>
-                {
-                };
-            }
-        } // format
-
-        namespace types
-        {
             template <unsigned Value> struct type_field : meta::unsigned_<Value>
             {
             };
 
+            using precision = type_field<0>;
+
+
             template <unsigned Value>
-            constexpr bool is_field(const type_field<Value> &)
+            struct numeric_field : meta::unsigned_<Value>
             {
-                return true;
-            }
+            };
 
-            namespace fields
+            using radix = numeric_field<1>;
+            using use_alternate_format = numeric_field<2>;
+
+
+            template <unsigned Value>
+            struct signed_numeric_field : meta::unsigned_<Value>
             {
-                using precision = type_field<0>;
-            }
+            };
 
-            namespace values
+            using always_print_sign = signed_numeric_field<3>;
+            using extra_blank_on_positive = signed_numeric_field<4>;
+
+
+            template <unsigned Value> struct real_field : meta::unsigned_<Value>
             {
-                template <unsigned Value>
-                struct precision : meta::unsigned_<Value>
-                {
-                };
-            }
+            };
 
-            namespace numeric
+            using representation = real_field<5>;
+        } // fields
+
+        namespace values
+        {
+            //
+            // format_field
+            //
+            using left_justified = meta::true_;
+            using right_justified = meta::false_;
+
+            template <char Value> struct pad_character : meta::char_<Value>
             {
-                template <unsigned Value>
-                struct numeric_field : meta::unsigned_<Value>
-                {
-                };
+            };
 
-                template <unsigned Value>
-                constexpr bool is_field(const numeric_field<Value> &)
-                {
-                    return true;
-                }
+            template <char Value> struct width : meta::unsigned_<Value>
+            {
+            };
 
-                namespace fields
-                {
-                    using radix = numeric_field<1>;
-                    using always_print_sign = numeric_field<2>;
-                    using extra_blank_on_positive = numeric_field<3>;
-                    using use_alternate_format = numeric_field<4>;
-                }
+            //
+            // type_field
+            //
+            template <unsigned Value> struct precision : meta::unsigned_<Value>
+            {
+            };
 
-                namespace values
-                {
-                    template <unsigned Value>
-                    using radix = meta::unsigned_<Value>;
+            //
+            // numeric_field
+            //
+            template <unsigned Value> using radix = meta::unsigned_<Value>;
 
-                    using always_print_sign = meta::true_;
-                    using only_print_negative_sign = meta::false_;
+            using use_alternate_format = meta::true_;
+            using use_standard_format = meta::false_;
 
-                    using extra_blank_on_positive = meta::true_;
-                    using no_extra_blank_on_positive = meta::false_;
+            //
+            // signed_numeric_field
+            //
+            using always_print_sign = meta::true_;
+            using only_print_negative_sign = meta::false_;
 
-                    using use_alternate_format = meta::true_;
-                    using use_standard_format = meta::false_;
-                }
+            using extra_blank_on_positive = meta::true_;
+            using no_extra_blank_on_positive = meta::false_;
 
-                namespace real
-                {
-                    template <unsigned Value>
-                    struct real_field : meta::unsigned_<Value>
-                    {
-                    };
+            //
+            // real_field
+            //
+            template <char Value> struct fixed : meta::char_<Value>
+            {
+            };
 
-                    template <unsigned Value>
-                    constexpr bool is_field(const real_field<Value> &)
-                    {
-                        return true;
-                    }
+            template <char Value> struct scientific : meta::char_<Value>
+            {
+            };
 
-                    namespace fields
-                    {
-                        using representation = real_field<5>;
-                    }
-
-                    namespace values
-                    {
-                        template <char Value> struct fixed : meta::char_<Value>
-                        {
-                        };
-
-                        template <char Value>
-                        struct scientific : meta::char_<Value>
-                        {
-                        };
-
-                        template <char Fixed, char Scientific> struct optimal
-                        {
-                            using type = optimal;
-                            const static char fixed = Fixed;
-                            const static char scientific = Scientific;
-                        };
-                    }
-                } // real
-            }     // numeric
-        }         // types
-    }             // output
+            template <char Fixed, char Scientific> struct optimal
+            {
+                using type = optimal;
+                const static char fixed = Fixed;
+                const static char scientific = Scientific;
+            };
+        } // values
+    }     // output
 } // ir
 } // prima
 

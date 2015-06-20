@@ -54,6 +54,21 @@ namespace meta
     template <typename Sequence>
     using length_t = typename boost::mpl::size<Sequence>::type;
 
+    struct or_func
+    {
+        template <typename...> struct apply : meta::false_
+        {
+        };
+
+        template <typename Test, typename... Tests>
+        struct apply<Test, Tests...>
+            : eval_if_t<Test, meta::true_, bind<or_func, Tests...>>
+        {
+        };
+    };
+
+    template <typename... Tests> using or_ = bind<or_func, Tests...>;
+
     struct push_back_func
     {
         template <typename Sequence, typename Value> struct apply
