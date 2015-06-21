@@ -96,19 +96,17 @@ namespace ir
             //
             // real_field
             //
-            template <char Value> struct fixed : meta::char_<Value>
+            enum class real_format : std::uint8_t
             {
+                fixed = 0,
+                scientific,
+                optimal
             };
 
-            template <char Value> struct scientific : meta::char_<Value>
+            template <real_format format> struct representation
             {
-            };
-
-            template <char Fixed, char Scientific> struct optimal
-            {
-                using type = optimal;
-                const static char fixed = Fixed;
-                const static char scientific = Scientific;
+                using type = representation;
+                constexpr const static real_format value = format;
             };
         } // values
     }     // output

@@ -13,7 +13,7 @@ namespace ir
     {
         namespace make
         {
-            template <typename Representation,
+            template <values::real_format Format,
                       typename Radix = values::radix<10>>
             using float_ = ::prima::ir::output::float_<
                 meta::vector<values::precision<6>,
@@ -21,7 +21,7 @@ namespace ir
                              values::use_standard_format,
                              values::only_print_negative_sign,
                              values::no_extra_blank_on_positive,
-                             Representation>>;
+                             values::representation<Format>>>;
 
             template <typename Radix = values::radix<10>>
             using int_ = ::prima::ir::output::int_<

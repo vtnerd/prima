@@ -43,40 +43,10 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::float_<Fields>>
         {
-            using representation =
-                ir::get_field_t<Fields, ir::output::fields::representation>;
-
-            enum class rep_type : std::uint8_t
+            constexpr static ir::output::values::real_format representation()
             {
-                fixed = 0,
-                scientific,
-                optimal
-            };
-
-            template <char Dot>
-            constexpr static rep_type
-            get_rep_type(const ir::output::values::fixed<Dot> &)
-            {
-                return rep_type::fixed;
-            }
-
-            template <char Scientific>
-            constexpr static rep_type
-            get_rep_type(const ir::output::values::scientific<Scientific> &)
-            {
-                return rep_type::scientific;
-            }
-
-            template <char Dot, char Scientific>
-            constexpr static rep_type
-            get_rep_type(const ir::output::values::optimal<Dot, Scientific> &)
-            {
-                return rep_type::optimal;
-            }
-
-            constexpr static rep_type get_rep_type()
-            {
-                return get_rep_type(representation{});
+                return ir::get_field_value<Fields,
+                                           ir::output::fields::representation>();
             }
 
             constexpr static bool use_alternate_format()
@@ -95,26 +65,22 @@ namespace backend
                                 const double fractional,
                                 const unsigned precision)
                 {
-                    namespace karma = boost::spirit::karma;
-
-                    switch (get_rep_type())
+                    switch (representation())
                     {
                     default:
-                    case rep_type::fixed:
-                    case rep_type::scientific:
+                    case ir::output::values::real_format::fixed:
+                    case ir::output::values::real_format::scientific:
                         if (use_alternate_format() || 0 < precision)
                         {
-                            return karma::char_inserter<>::call(
-                                sink, representation::value);
+                            return base::dot(sink, fractional, precision);
                         }
                         break;
 
-                    case rep_type::optimal:
+                    case ir::output::values::real_format::optimal:
                         if (use_alternate_format() ||
-                            (1.0f > fractional && 0.0f <= fractional))
+                            !boost::spirit::traits::test_zero(fractional))
                         {
-                            return karma::char_inserter<>::call(
-                                sink, representation::value);
+                            return base::dot(sink, fractional, precision);
                         }
                         break;
                     }
@@ -122,20 +88,53 @@ namespace backend
                     return true;
                 }
 
+                template <typename CharEncoding,
+                          typename Tag,
+                          typename OutputIterator>
+                static bool exponent(OutputIterator &sink, const long n)
+                {
+                    namespace karma = boost::spirit::karma;
+
+                    const long abs_n =
+                        boost::spirit::traits::get_absolute_value(n);
+                    bool r =
+                        karma::char_inserter<CharEncoding, Tag>::call(sink,
+                                                                      'e') &&
+                        karma::sign_inserter::call(
+                            sink,
+                            boost::spirit::traits::test_zero(n),
+                            boost::spirit::traits::test_negative(n),
+                            true,
+                            true);
+
+                    // the C99 Standard requires at least two digits in the
+                    // exponent
+                    if (r && abs_n < 10)
+                    {
+                        r = karma::char_inserter<CharEncoding, Tag>::call(sink,
+                                                                          '0');
+                    }
+                    return r && karma::int_inserter<10>::call(sink, abs_n);
+                }
+
                 static int floatfield(const double value)
                 {
-                    switch (get_rep_type())
+                    switch (representation())
                     {
                     default:
-                    case rep_type::fixed:
+                    case ir::output::values::real_format::fixed:
                         return fmtflags::fixed;
 
-                    case rep_type::scientific:
+                    case ir::output::values::real_format::scientific:
                         return fmtflags::scientific;
 
-                    case rep_type::optimal:
-                        if (value >= 0.0001 &&
-                            value <= std::pow(10, precision(value)))
+                    case ir::output::values::real_format::optimal:
+                    {
+                        const double abs_value =
+                            boost::spirit::traits::get_absolute_value(value);
+                        if ((abs_value >= 0.0001 &&
+                             abs_value <= std::pow(10, precision())) ||
+                            boost::spirit::traits::test_zero(value))
                         {
                             return fmtflags::fixed;
                         }
@@ -144,6 +143,34 @@ namespace backend
                             return fmtflags::scientific;
                         }
                     }
+                    }
+                }
+
+                template <typename OutputIterator>
+                static bool fraction_part(OutputIterator &sink,
+                                          double n,
+                                          unsigned precision_,
+                                          unsigned precision)
+                {
+                    // allow for ADL to find the correct overload for floor and
+                    // log10
+                    using namespace std;
+                    namespace karma = boost::spirit::karma;
+
+                    // The following is equivalent to:
+                    //    generate(sink, right_align(precision, '0')[ulong], n);
+                    // but it's spelled out to avoid inter-modular dependencies.
+
+                    double digits = (boost::spirit::traits::test_zero(n) ?
+                                         0 :
+                                         floor(log10(n))) +
+                                    1;
+                    bool r = true;
+                    for (/**/; r && digits < precision_; digits = digits + 1)
+                        r = karma::char_inserter<>::call(sink, '0');
+                    if (precision_ && r)
+                        r = karma::int_inserter<10>::call(sink, n);
+                    return r;
                 }
 
                 template <typename OutputIterator>
@@ -187,29 +214,54 @@ namespace backend
                     return base::integer_part(sink, n, sign, false);
                 }
 
-                static constexpr unsigned precision(double)
+                static constexpr unsigned precision()
                 {
                     return ir::get_field_value<Fields,
                                                ir::output::fields::precision>();
                 }
 
-                static bool trailing_zeros(double)
+                static unsigned precision(const double value)
                 {
-                    switch (get_rep_type())
+                    switch (representation())
                     {
                     default:
-                    case rep_type::fixed:
-                    case rep_type::scientific:
+                    case ir::output::values::real_format::fixed:
+                    case ir::output::values::real_format::scientific:
+                        return precision();
+
+                    case ir::output::values::real_format::optimal:
+                        switch (floatfield(value))
+                        {
+                        case fmtflags::fixed:
+                            return precision();
+
+                        case fmtflags::scientific:
+                            return precision() ? precision() - 1 : 0;
+                        }
+                    }
+                }
+
+                static bool trailing_zeros(double)
+                {
+                    switch (representation())
+                    {
+                    default:
+                    case ir::output::values::real_format::fixed:
+                    case ir::output::values::real_format::scientific:
                         return true;
 
-                    case rep_type::optimal:
-                        return !use_alternate_format();
+                    case ir::output::values::real_format::optimal:
+                        return use_alternate_format();
                     }
                 }
             };
 
             static auto apply()
             {
+                static_assert(
+                    ir::get_field_value<Fields, ir::output::fields::radix>() ==
+                        10,
+                    "Decimal output only for float generator");
                 using float_generator =
                     boost::spirit::karma::real_generator<double, real_policy>;
                 return boost::proto::deep_copy(float_generator{});
@@ -265,8 +317,7 @@ namespace backend
                 return boost::proto::deep_copy(uint_generator{});
             }
 
-            static auto with_precision(
-                const ir::output::values::precision<1> &)
+            static auto with_precision(const ir::output::values::precision<1> &)
             {
                 return print_number();
             }
@@ -288,7 +339,7 @@ namespace backend
         template <char... Characters>
         struct generate_tree<ir::literal<Characters...>>
         {
-            static const char* apply()
+            static const char *apply()
             {
                 constexpr const static char literal_[] = {Characters..., 0};
                 return literal_;
