@@ -36,13 +36,6 @@ namespace frontend
         class generate_format_func
         {
         private:
-            template <typename Field, typename Type>
-            constexpr static bool has_field_(const Type &type)
-            {
-                using ir::has_field;
-                return has_field<Field>(type);
-            }
-
             template <typename Width, typename Type> struct state
             {
                 using width = Width;
@@ -88,9 +81,9 @@ namespace frontend
                 private:
                     using field = meta::at_ct<FieldValue, 0>;
                     constexpr const static bool is_width_field =
-                        has_field_<field>(typename State::width{});
+                        ir::has_field(typename State::width{}, field{});
                     constexpr const static bool is_type_field =
-                        has_field_<field>(typename State::type{});
+                        ir::has_field(typename State::type{}, field{});
                     static_assert(is_width_field != is_type_field,
                                   "invalid field for type");
 
@@ -111,7 +104,8 @@ namespace frontend
                 using precision_uint = meta::at_ct<Sequence, 2>;
                 using output_type = meta::at_ct<Sequence, 3>;
 
-                static_assert(has_field_<oir::fields::precision>(output_type{}),
+                static_assert(ir::has_field(output_type{},
+                                            oir::fields::precision{}),
                               "invalid type field");
 
                 using normalized_precision =

@@ -10,12 +10,6 @@ namespace ir
 {
     namespace output
     {
-        template <typename Inner> struct lower_case
-        {
-            using type = lower_case;
-            using inner = Inner;
-        };
-
         template <typename Inner> struct upper_case
         {
             using type = upper_case;
@@ -29,10 +23,12 @@ namespace ir
             using inner = Inner;
         };
 
-        template <typename Field, typename Fields, typename Inner>
-        constexpr bool has_field(const width<Fields, Inner> &)
+        template <typename Fields, typename Inner, typename Field>
+        constexpr bool
+        has_field(const width<Fields, Inner> &, const Field &) noexcept
         {
-            return is_field<Field, fields::format_field>::value;
+            namespace fields_ = ::prima::ir::output::fields;
+            return is_field<Field, fields_::format_field>::value;
         }
 
         template <typename Fields> struct string
@@ -41,10 +37,11 @@ namespace ir
             using fields = Fields;
         };
 
-        template <typename Field, typename Fields>
-        constexpr bool has_field(const string<Fields> &)
+        template <typename Fields, typename Field>
+        constexpr bool has_field(const string<Fields> &, const Field &) noexcept
         {
-            return is_field<Field, fields::type_field>::value;
+            namespace fields_ = ::prima::ir::output::fields;
+            return is_field<Field, fields_::type_field>::value;
         }
 
         template <typename Fields> struct int_
@@ -53,13 +50,14 @@ namespace ir
             using fields = Fields;
         };
 
-        template <typename Field, typename Fields>
-        constexpr bool has_field(const int_<Fields> &)
+        template <typename Fields, typename Field>
+        constexpr bool has_field(const int_<Fields> &, const Field &) noexcept
         {
+            namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
-                                fields::type_field,
-                                fields::numeric_field,
-                                fields::signed_numeric_field>::value;
+                                fields_::type_field,
+                                fields_::numeric_field,
+                                fields_::signed_numeric_field>::value;
         }
 
         template <typename Fields> struct unsigned_
@@ -68,12 +66,14 @@ namespace ir
             using fields = Fields;
         };
 
-        template <typename Field, typename Fields>
-        constexpr bool has_field(const unsigned_<Fields> &)
+        template <typename Fields, typename Field>
+        constexpr bool
+        has_field(const unsigned_<Fields> &, const Field &) noexcept
         {
+            namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
-                                fields::type_field,
-                                fields::numeric_field>::value;
+                                fields_::type_field,
+                                fields_::numeric_field>::value;
         }
 
         template <typename Fields> struct float_
@@ -82,14 +82,15 @@ namespace ir
             using fields = Fields;
         };
 
-        template <typename Field, typename Fields>
-        constexpr bool has_field(const float_<Fields> &)
+        template <typename Fields, typename Field>
+        constexpr bool has_field(const float_<Fields> &, const Field &) noexcept
         {
+            namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
-                                fields::type_field,
-                                fields::numeric_field,
-                                fields::signed_numeric_field,
-                                fields::real_field>::value;
+                                fields_::type_field,
+                                fields_::numeric_field,
+                                fields_::signed_numeric_field,
+                                fields_::real_field>::value;
         }
     } // output
 } // ir

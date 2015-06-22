@@ -21,14 +21,41 @@ namespace ir
     template <typename Fields, typename Field>
     using get_field_t = meta::at_t<Fields, Field>;
 
-    template <typename Fields, typename Field> constexpr auto get_field_value()
+    template <typename Fields, typename Field>
+    constexpr auto get_field_value() noexcept
     {
         return get_field_t<Fields, Field>::value;
     }
 
-    template <typename> constexpr bool has_field(...)
+    namespace detail
     {
-        return false;
+        constexpr bool has_field(...) noexcept
+        {
+            return false;
+        }
+
+        struct has_field_fn
+        {
+            template <typename Type, typename Field>
+            constexpr bool
+            operator()(const Type& type, const Field& field) const noexcept
+            {
+                return has_field(type, field);
+            }
+        };
+
+        template <typename T> struct static_const
+        {
+            constexpr const static T value = T{};
+        };
+
+        template <typename T> constexpr const T static_const<T>::value;
+    }
+
+    namespace
+    {
+        constexpr const auto& has_field =
+            detail::static_const<detail::has_field_fn>::value;
     }
 
     template <template <unsigned> class Field> struct is_field_func

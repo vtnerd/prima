@@ -16,79 +16,92 @@ void has_field_tests()
 {
     namespace fields = ir::output::fields;
     namespace make = ir::output::make;
-    using ir::has_field;
+    namespace values = ir::output::values;
+
+    constexpr const auto left_justified = fields::left_justified{};
+    constexpr const auto pad_character = fields::pad_character{};
+    constexpr const auto width = fields::width{};
+    constexpr const auto precision = fields::precision{};
+    constexpr const auto radix = fields::radix{};
+    constexpr const auto use_alternate_format = fields::use_alternate_format{};
+    constexpr const auto always_print_sign = fields::always_print_sign{};
+    constexpr const auto extra_blank_on_positive =
+        fields::extra_blank_on_positive{};
+    constexpr const auto representation = fields::representation{};
+
     {
-        constexpr const auto float_ = make::float_<meta::void_>{};
-        BOOST_TEST(!has_field<fields::left_justified>(float_));
-        BOOST_TEST(!has_field<fields::pad_character>(float_));
-        BOOST_TEST(!has_field<fields::width>(float_));
-        BOOST_TEST(has_field<fields::precision>(float_));
-        BOOST_TEST(has_field<fields::radix>(float_));
-        BOOST_TEST(has_field<fields::use_alternate_format>(float_));
-        BOOST_TEST(has_field<fields::always_print_sign>(float_));
-        BOOST_TEST(has_field<fields::extra_blank_on_positive>(float_));
-        BOOST_TEST(has_field<fields::representation>(float_));
+        constexpr const auto float_ =
+            make::float_<values::real_format::fixed>{};
+        BOOST_TEST(!ir::has_field(float_, left_justified));
+        BOOST_TEST(!ir::has_field(float_, pad_character));
+        BOOST_TEST(!ir::has_field(float_, width));
+        BOOST_TEST(ir::has_field(float_, precision));
+        BOOST_TEST(ir::has_field(float_, radix));
+        BOOST_TEST(ir::has_field(float_, use_alternate_format));
+        BOOST_TEST(ir::has_field(float_, always_print_sign));
+        BOOST_TEST(ir::has_field(float_, extra_blank_on_positive));
+        BOOST_TEST(ir::has_field(float_, representation));
     }
     {
         constexpr const auto int_ = make::int_<>{};
-        BOOST_TEST(!has_field<fields::left_justified>(int_));
-        BOOST_TEST(!has_field<fields::pad_character>(int_));
-        BOOST_TEST(!has_field<fields::width>(int_));
-        BOOST_TEST(has_field<fields::precision>(int_));
-        BOOST_TEST(has_field<fields::radix>(int_));
-        BOOST_TEST(has_field<fields::use_alternate_format>(int_));
-        BOOST_TEST(has_field<fields::always_print_sign>(int_));
-        BOOST_TEST(has_field<fields::extra_blank_on_positive>(int_));
-        BOOST_TEST(!has_field<fields::representation>(int_));
+        BOOST_TEST(!ir::has_field(int_, left_justified));
+        BOOST_TEST(!ir::has_field(int_, pad_character));
+        BOOST_TEST(!ir::has_field(int_, width));
+        BOOST_TEST(ir::has_field(int_, precision));
+        BOOST_TEST(ir::has_field(int_, radix));
+        BOOST_TEST(ir::has_field(int_, use_alternate_format));
+        BOOST_TEST(ir::has_field(int_, always_print_sign));
+        BOOST_TEST(ir::has_field(int_, extra_blank_on_positive));
+        BOOST_TEST(!ir::has_field(int_, representation));
     }
     {
         constexpr const auto string = make::string{};
-        BOOST_TEST(!has_field<fields::left_justified>(string));
-        BOOST_TEST(!has_field<fields::pad_character>(string));
-        BOOST_TEST(!has_field<fields::width>(string));
-        BOOST_TEST(has_field<fields::precision>(string));
-        BOOST_TEST(!has_field<fields::radix>(string));
-        BOOST_TEST(!has_field<fields::use_alternate_format>(string));
-        BOOST_TEST(!has_field<fields::always_print_sign>(string));
-        BOOST_TEST(!has_field<fields::extra_blank_on_positive>(string));
-        BOOST_TEST(!has_field<fields::representation>(string));
+        BOOST_TEST(!ir::has_field(string, left_justified));
+        BOOST_TEST(!ir::has_field(string, pad_character));
+        BOOST_TEST(!ir::has_field(string, width));
+        BOOST_TEST(ir::has_field(string, precision));
+        BOOST_TEST(!ir::has_field(string, radix));
+        BOOST_TEST(!ir::has_field(string, use_alternate_format));
+        BOOST_TEST(!ir::has_field(string, always_print_sign));
+        BOOST_TEST(!ir::has_field(string, extra_blank_on_positive));
+        BOOST_TEST(!ir::has_field(string, representation));
     }
     {
         constexpr const auto upper_case = make::upper_case<meta::void_>{};
-        BOOST_TEST(!has_field<fields::left_justified>(upper_case));
-        BOOST_TEST(!has_field<fields::pad_character>(upper_case));
-        BOOST_TEST(!has_field<fields::width>(upper_case));
-        BOOST_TEST(!has_field<fields::precision>(upper_case));
-        BOOST_TEST(!has_field<fields::radix>(upper_case));
-        BOOST_TEST(!has_field<fields::use_alternate_format>(upper_case));
-        BOOST_TEST(!has_field<fields::always_print_sign>(upper_case));
-        BOOST_TEST(!has_field<fields::extra_blank_on_positive>(upper_case));
-        BOOST_TEST(!has_field<fields::representation>(upper_case));
+        BOOST_TEST(!ir::has_field(upper_case, left_justified));
+        BOOST_TEST(!ir::has_field(upper_case, pad_character));
+        BOOST_TEST(!ir::has_field(upper_case, width));
+        BOOST_TEST(!ir::has_field(upper_case, precision));
+        BOOST_TEST(!ir::has_field(upper_case, radix));
+        BOOST_TEST(!ir::has_field(upper_case, use_alternate_format));
+        BOOST_TEST(!ir::has_field(upper_case, always_print_sign));
+        BOOST_TEST(!ir::has_field(upper_case, extra_blank_on_positive));
+        BOOST_TEST(!ir::has_field(upper_case, representation));
     }
     {
         constexpr const auto unsigned_ = make::unsigned_<>{};
-        BOOST_TEST(!has_field<fields::left_justified>(unsigned_));
-        BOOST_TEST(!has_field<fields::pad_character>(unsigned_));
-        BOOST_TEST(!has_field<fields::width>(unsigned_));
-        BOOST_TEST(has_field<fields::precision>(unsigned_));
-        BOOST_TEST(has_field<fields::radix>(unsigned_));
-        BOOST_TEST(has_field<fields::use_alternate_format>(unsigned_));
-        BOOST_TEST(!has_field<fields::always_print_sign>(unsigned_));
-        BOOST_TEST(!has_field<fields::extra_blank_on_positive>(unsigned_));
-        BOOST_TEST(!has_field<fields::representation>(unsigned_));
+        BOOST_TEST(!ir::has_field(unsigned_, left_justified));
+        BOOST_TEST(!ir::has_field(unsigned_, pad_character));
+        BOOST_TEST(!ir::has_field(unsigned_, width));
+        BOOST_TEST(ir::has_field(unsigned_, precision));
+        BOOST_TEST(ir::has_field(unsigned_, radix));
+        BOOST_TEST(ir::has_field(unsigned_, use_alternate_format));
+        BOOST_TEST(!ir::has_field(unsigned_, always_print_sign));
+        BOOST_TEST(!ir::has_field(unsigned_, extra_blank_on_positive));
+        BOOST_TEST(!ir::has_field(unsigned_, representation));
     }
     {
-        constexpr const auto width =
+        constexpr const auto width_ =
             make::width<meta::unsigned_<2>, meta::void_>{};
-        BOOST_TEST(has_field<fields::left_justified>(width));
-        BOOST_TEST(has_field<fields::pad_character>(width));
-        BOOST_TEST(has_field<fields::width>(width));
-        BOOST_TEST(!has_field<fields::precision>(width));
-        BOOST_TEST(!has_field<fields::radix>(width));
-        BOOST_TEST(!has_field<fields::use_alternate_format>(width));
-        BOOST_TEST(!has_field<fields::always_print_sign>(width));
-        BOOST_TEST(!has_field<fields::extra_blank_on_positive>(width));
-        BOOST_TEST(!has_field<fields::representation>(width));
+        BOOST_TEST(ir::has_field(width_, left_justified));
+        BOOST_TEST(ir::has_field(width_, pad_character));
+        BOOST_TEST(ir::has_field(width_, width));
+        BOOST_TEST(!ir::has_field(width_, precision));
+        BOOST_TEST(!ir::has_field(width_, radix));
+        BOOST_TEST(!ir::has_field(width_, use_alternate_format));
+        BOOST_TEST(!ir::has_field(width_, always_print_sign));
+        BOOST_TEST(!ir::has_field(width_, extra_blank_on_positive));
+        BOOST_TEST(!ir::has_field(width_, representation));
     }
 }
 
