@@ -54,6 +54,29 @@ namespace meta
     template <typename Sequence>
     using length_t = typename boost::mpl::size<Sequence>::type;
 
+    struct make_index_sequence_impl
+    {
+        template <typename, unsigned> struct apply;
+
+        template <unsigned... Sequence>
+        struct apply<index_sequence<Sequence...>, 0>
+        {
+            using type = index_sequence<Sequence...>;
+        };
+
+        template <unsigned... Sequence, unsigned Head>
+        struct apply<index_sequence<Sequence...>, Head>
+        {
+            using type = typename apply<index_sequence<Head - 1, Sequence...>,
+                                        Head - 1>::type;
+        };
+    };
+
+    template <unsigned Count>
+    using make_index_sequence_t =
+        typename make_index_sequence_impl::template apply<index_sequence<>,
+                                                          Count>::type;
+
     struct or_func
     {
         template <typename...> struct apply : meta::false_

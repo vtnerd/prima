@@ -10,41 +10,15 @@ namespace ir
 {
     namespace manip
     {
-        class update_field_func
+        struct update_field_func
         {
-        private:
-            template <unsigned... Sequence> struct range_sequence
-            {
-                using type = range_sequence;
-            };
-
-            template <typename, unsigned, unsigned> struct expand;
-
-            template <unsigned... Range, unsigned Start, unsigned End>
-            struct expand<range_sequence<Range...>, Start, End>
-            {
-                static_assert(Start <= End, "bad range");
-                constexpr const static unsigned current_size = sizeof...(Range);
-                using type = meta::eval_if_ct<
-                    current_size == End - Start,
-                    range_sequence<Range...>,
-                    expand<range_sequence<Range..., Start + current_size>,
-                           Start,
-                           End>>;
-            };
-
-            template <unsigned Start, unsigned End>
-            using make_range_sequence =
-                typename expand<range_sequence<>, Start, End>::type;
-
-        public:
             template <typename Fields, typename Field, typename Value>
             class apply
             {
             private:
-                using holder_size = meta::length_t<Fields>;
-                static_assert(Field::value < holder_size::value,
-                              "invalid field");
+                constexpr const static auto holder_size =
+                    meta::length_t<Fields>::value;
+                static_assert(Field::value < holder_size, "invalid field");
 
                 template <typename, typename, typename> struct update;
 
@@ -53,20 +27,21 @@ namespace ir
                           unsigned... Head,
                           unsigned... Tail>
                 struct update<Sequence<Replaced...>,
-                              range_sequence<Head...>,
-                              range_sequence<Tail...>>
+                              meta::index_sequence<Head...>,
+                              meta::index_sequence<Tail...>>
                 {
-                    using type = Sequence<meta::at_ct<Fields, Head>...,
-                                          Value,
-                                          meta::at_ct<Fields, Tail>...>;
+                    using type = Sequence<
+                        meta::at_ct<Fields, Head>...,
+                        Value,
+                        meta::at_ct<Fields, Field::value + 1 + Tail>...>;
                 };
 
             public:
-                using type = typename update<
-                    Fields,
-                    make_range_sequence<0, Field::value>,
-                    make_range_sequence<Field::value + 1,
-                                        holder_size::value>>::type;
+                using type =
+                    typename update<Fields,
+                                    meta::make_index_sequence_t<Field::value>,
+                                    meta::make_index_sequence_t<
+                                        holder_size - Field::value + 1>>::type;
             };
         };
 

@@ -18,6 +18,12 @@ namespace meta
     using boost::mpl::char_;
     using boost::mpl::false_;
     using boost::mpl::identity;
+
+    template <unsigned... Sequence> struct index_sequence
+    {
+        using type = index_sequence;
+    };
+
     using boost::mpl::is_void_;
     using mpllibs::metaparse::string;
     using boost::mpl::true_;
