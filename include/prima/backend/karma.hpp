@@ -536,7 +536,7 @@ namespace backend
         //!
         //! \throws Iff `boost::spirit::karma::generate` throws
         //!
-        //! \return True if `boost::spirit::karma::generate` returns true.
+        //! \return Result of `boost::spirit::karma::generate`.
         template <typename IR, typename Iterator>
         static bool generate(Iterator &&iterator)
         {
@@ -565,7 +565,7 @@ namespace backend
         //!
         //! \throws Iff `boost::spirit::karma::generate` throws
         //!
-        //! \return True if `boost::spirit::karma::generate` returns true.
+        //! \return Result of `boost::spirit::karma::generate`.
         template <typename IR, typename Iterator, typename Arg1, typename... Args>
         static bool
         generate(Iterator &&iterator, const Arg1 &arg1, const Args &... args)
