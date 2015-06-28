@@ -530,12 +530,13 @@ namespace backend
         //!
         //! Outputs the static expression `IR` to `iterator`.
         //!
+        //! \requires `IR` is output from frontend::sprintf_parser_func.
         //! \requires `Iterator` meets the requirements of the OutputIterator
         //!  concept.
         //!
         //! \throws Iff `boost::spirit::karma::generate` throws
         //!
-        //! \return True if there were no errors while writing to `iterator`.
+        //! \return True if `boost::spirit::karma::generate` returns true.
         template <typename IR, typename Iterator>
         static bool generate(Iterator &&iterator)
         {
@@ -558,12 +559,13 @@ namespace backend
         //!
         //! Outputs the dynamic expression `IR` to `iterator`.
         //!
+        //! \requires `IR` is output from frontend::sprintf_parser_func.
         //! \requires `Iterator` meets the requirements of the OutputIterator
         //!  concept.
         //!
         //! \throws Iff `boost::spirit::karma::generate` throws
         //!
-        //! \return True if there were no errors while writing to `iterator`.
+        //! \return True if `boost::spirit::karma::generate` returns true.
         template <typename IR, typename Iterator, typename Arg1, typename... Args>
         static bool
         generate(Iterator &&iterator, const Arg1 &arg1, const Args &... args)
