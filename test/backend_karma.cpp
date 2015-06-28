@@ -32,8 +32,8 @@ namespace
             system_sprintf.resize(karma_sprintf.size() + 1);
 
             BOOST_TEST_EQ(
-                karma_sprintf.size(),
-                ::snprintf(&system_sprintf[0], system_sprintf.size(), get_literal(Format{}), args...));
+                ::snprintf(&system_sprintf[0], system_sprintf.size(), get_literal(Format{}), args...),
+                karma_sprintf.size());
 
             system_sprintf.resize(karma_sprintf.size());
             BOOST_TEST_EQ(system_sprintf, karma_sprintf);
@@ -44,6 +44,7 @@ namespace
 
 void float_tests()
 {
+    // fixed format
     BOOST_TEST_EQ("0.000000", generate_and_system_compare<PRIMA_FMT("%f")>(0.0f));
     BOOST_TEST_EQ("1.000000", generate_and_system_compare<PRIMA_FMT("%f")>(1.0f));
     BOOST_TEST_EQ("-1.000000", generate_and_system_compare<PRIMA_FMT("%f")>(-1.0f));
@@ -79,6 +80,198 @@ void float_tests()
     BOOST_TEST_EQ("-1.0", generate_and_system_compare<PRIMA_FMT("%+.1f")>(-1.0f));
     BOOST_TEST_EQ("+1.5", generate_and_system_compare<PRIMA_FMT("%+.1f")>(1.5f));
     BOOST_TEST_EQ("-1.5", generate_and_system_compare<PRIMA_FMT("%+.1f")>(-1.5f));
+    BOOST_TEST_EQ("0.1", generate_and_system_compare<PRIMA_FMT("%.1f")>(0.05f));
+    BOOST_TEST_EQ("-0.1", generate_and_system_compare<PRIMA_FMT("%.1f")>(-0.05f));
+    BOOST_TEST_EQ("nan", generate<PRIMA_FMT("%f")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("inf", generate<PRIMA_FMT("%f")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("+nan", generate<PRIMA_FMT("%+f")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("+inf", generate<PRIMA_FMT("%+f")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("-nan", generate<PRIMA_FMT("%f")>(-std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("-inf", generate<PRIMA_FMT("%f")>(-std::numeric_limits<float>::infinity()));
+
+    // fixed format (upper case)
+    BOOST_TEST_EQ("0.000000", generate_and_system_compare<PRIMA_FMT("%F")>(0.0f));
+    BOOST_TEST_EQ("1.000000", generate_and_system_compare<PRIMA_FMT("%F")>(1.0f));
+    BOOST_TEST_EQ("-1.000000", generate_and_system_compare<PRIMA_FMT("%F")>(-1.0f));
+    BOOST_TEST_EQ("1.500000", generate_and_system_compare<PRIMA_FMT("%F")>(1.5f));
+    BOOST_TEST_EQ("-1.500000", generate_and_system_compare<PRIMA_FMT("%F")>(-1.5f));
+    BOOST_TEST_EQ("0.000", generate_and_system_compare<PRIMA_FMT("%.3F")>(0.0f));
+    BOOST_TEST_EQ("1.000", generate_and_system_compare<PRIMA_FMT("%.3F")>(1.0f));
+    BOOST_TEST_EQ("-1.000", generate_and_system_compare<PRIMA_FMT("%.3F")>(-1.0f));
+    BOOST_TEST_EQ("1.500", generate_and_system_compare<PRIMA_FMT("%.3F")>(1.5f));
+    BOOST_TEST_EQ("-1.500", generate_and_system_compare<PRIMA_FMT("%.3F")>(-1.5f));
+    BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%.0F")>(0.0f));
+    BOOST_TEST_EQ("1", generate_and_system_compare<PRIMA_FMT("%.0F")>(1.0f));
+    BOOST_TEST_EQ("-1", generate_and_system_compare<PRIMA_FMT("%.0F")>(-1.0f));
+    BOOST_TEST_EQ("2", generate_and_system_compare<PRIMA_FMT("%.0F")>(1.5f));
+    BOOST_TEST_EQ("-2", generate_and_system_compare<PRIMA_FMT("%.0F")>(-1.5f));
+    BOOST_TEST_EQ("0.", generate_and_system_compare<PRIMA_FMT("%#.0F")>(0.0f));
+    BOOST_TEST_EQ("1.", generate_and_system_compare<PRIMA_FMT("%#.0F")>(1.0f));
+    BOOST_TEST_EQ("-1.", generate_and_system_compare<PRIMA_FMT("%#.0F")>(-1.0f));
+    BOOST_TEST_EQ("2.", generate_and_system_compare<PRIMA_FMT("%#.0F")>(1.5f));
+    BOOST_TEST_EQ("-2.", generate_and_system_compare<PRIMA_FMT("%#.0F")>(-1.5f));
+    BOOST_TEST_EQ("0.0000000", generate_and_system_compare<PRIMA_FMT("%#.7F")>(0.0f));
+    BOOST_TEST_EQ("1.0000000", generate_and_system_compare<PRIMA_FMT("%#.7F")>(1.0f));
+    BOOST_TEST_EQ("-1.0000000", generate_and_system_compare<PRIMA_FMT("%#.7F")>(-1.0f));
+    BOOST_TEST_EQ("1.5000000", generate_and_system_compare<PRIMA_FMT("%#.7F")>(1.5f));
+    BOOST_TEST_EQ("-1.5000000", generate_and_system_compare<PRIMA_FMT("%#.7F")>(-1.5f));
+    BOOST_TEST_EQ(" 0.0", generate_and_system_compare<PRIMA_FMT("% .1F")>(0.0f));
+    BOOST_TEST_EQ(" 1.0", generate_and_system_compare<PRIMA_FMT("% .1F")>(1.0f));
+    BOOST_TEST_EQ("-1.0", generate_and_system_compare<PRIMA_FMT("% .1F")>(-1.0f));
+    BOOST_TEST_EQ(" 1.5", generate_and_system_compare<PRIMA_FMT("% .1F")>(1.5f));
+    BOOST_TEST_EQ("-1.5", generate_and_system_compare<PRIMA_FMT("% .1F")>(-1.5f));
+    BOOST_TEST_EQ("+0.0", generate_and_system_compare<PRIMA_FMT("%+.1F")>(0.0f));
+    BOOST_TEST_EQ("+1.0", generate_and_system_compare<PRIMA_FMT("%+.1F")>(1.0f));
+    BOOST_TEST_EQ("-1.0", generate_and_system_compare<PRIMA_FMT("%+.1F")>(-1.0f));
+    BOOST_TEST_EQ("+1.5", generate_and_system_compare<PRIMA_FMT("%+.1F")>(1.5f));
+    BOOST_TEST_EQ("-1.5", generate_and_system_compare<PRIMA_FMT("%+.1F")>(-1.5f));
+    BOOST_TEST_EQ("0.1", generate_and_system_compare<PRIMA_FMT("%.1F")>(0.05f));
+    BOOST_TEST_EQ("-0.1", generate_and_system_compare<PRIMA_FMT("%.1F")>(-0.05f));
+    BOOST_TEST_EQ("NAN", generate<PRIMA_FMT("%F")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("INF", generate<PRIMA_FMT("%F")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("+NAN", generate<PRIMA_FMT("%+F")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("+INF", generate<PRIMA_FMT("%+F")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("-NAN", generate<PRIMA_FMT("%F")>(-std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("-INF", generate<PRIMA_FMT("%F")>(-std::numeric_limits<float>::infinity()));
+
+    // scientific format
+    BOOST_TEST_EQ("0.000000e+00", generate_and_system_compare<PRIMA_FMT("%e")>(0.0f));
+    BOOST_TEST_EQ("1.000000e+00", generate_and_system_compare<PRIMA_FMT("%e")>(1.0f));
+    BOOST_TEST_EQ("-1.000000e+00", generate_and_system_compare<PRIMA_FMT("%e")>(-1.0f));
+    BOOST_TEST_EQ("1.500000e+00", generate_and_system_compare<PRIMA_FMT("%e")>(1.5f));
+    BOOST_TEST_EQ("-1.500000e+00", generate_and_system_compare<PRIMA_FMT("%e")>(-1.5f));
+    BOOST_TEST_EQ("0.000e+00", generate_and_system_compare<PRIMA_FMT("%.3e")>(0.0f));
+    BOOST_TEST_EQ("1.000e+00", generate_and_system_compare<PRIMA_FMT("%.3e")>(1.0f));
+    BOOST_TEST_EQ("-1.000e+00", generate_and_system_compare<PRIMA_FMT("%.3e")>(-1.0f));
+    BOOST_TEST_EQ("1.500e+00", generate_and_system_compare<PRIMA_FMT("%.3e")>(1.5f));
+    BOOST_TEST_EQ("-1.500e+00", generate_and_system_compare<PRIMA_FMT("%.3e")>(-1.5f));
+    BOOST_TEST_EQ("0e+00", generate_and_system_compare<PRIMA_FMT("%.0e")>(0.0f));
+    BOOST_TEST_EQ("1e+00", generate_and_system_compare<PRIMA_FMT("%.0e")>(1.0f));
+    BOOST_TEST_EQ("-1e+00", generate_and_system_compare<PRIMA_FMT("%.0e")>(-1.0f));
+    BOOST_TEST_EQ("2e+00", generate_and_system_compare<PRIMA_FMT("%.0e")>(1.5f));
+    BOOST_TEST_EQ("-2e+00", generate_and_system_compare<PRIMA_FMT("%.0e")>(-1.5f));
+    BOOST_TEST_EQ("0.e+00", generate_and_system_compare<PRIMA_FMT("%#.0e")>(0.0f));
+    BOOST_TEST_EQ("1.e+00", generate_and_system_compare<PRIMA_FMT("%#.0e")>(1.0f));
+    BOOST_TEST_EQ("-1.e+00", generate_and_system_compare<PRIMA_FMT("%#.0e")>(-1.0f));
+    BOOST_TEST_EQ("2.e+00", generate_and_system_compare<PRIMA_FMT("%#.0e")>(1.5f));
+    BOOST_TEST_EQ("-2.e+00", generate_and_system_compare<PRIMA_FMT("%#.0e")>(-1.5f));
+    BOOST_TEST_EQ("0.0000000e+00", generate_and_system_compare<PRIMA_FMT("%#.7e")>(0.0f));
+    BOOST_TEST_EQ("1.0000000e+00", generate_and_system_compare<PRIMA_FMT("%#.7e")>(1.0f));
+    BOOST_TEST_EQ("-1.0000000e+00", generate_and_system_compare<PRIMA_FMT("%#.7e")>(-1.0f));
+    BOOST_TEST_EQ("1.5000000e+00", generate_and_system_compare<PRIMA_FMT("%#.7e")>(1.5f));
+    BOOST_TEST_EQ("-1.5000000e+00", generate_and_system_compare<PRIMA_FMT("%#.7e")>(-1.5f));
+    BOOST_TEST_EQ(" 0.0e+00", generate_and_system_compare<PRIMA_FMT("% .1e")>(0.0f));
+    BOOST_TEST_EQ(" 1.0e+00", generate_and_system_compare<PRIMA_FMT("% .1e")>(1.0f));
+    BOOST_TEST_EQ("-1.0e+00", generate_and_system_compare<PRIMA_FMT("% .1e")>(-1.0f));
+    BOOST_TEST_EQ(" 1.5e+00", generate_and_system_compare<PRIMA_FMT("% .1e")>(1.5f));
+    BOOST_TEST_EQ("-1.5e+00", generate_and_system_compare<PRIMA_FMT("% .1e")>(-1.5f));
+    BOOST_TEST_EQ("+0.0e+00", generate_and_system_compare<PRIMA_FMT("%+.1e")>(0.0f));
+    BOOST_TEST_EQ("+1.0e+00", generate_and_system_compare<PRIMA_FMT("%+.1e")>(1.0f));
+    BOOST_TEST_EQ("-1.0e+00", generate_and_system_compare<PRIMA_FMT("%+.1e")>(-1.0f));
+    BOOST_TEST_EQ("+1.5e+00", generate_and_system_compare<PRIMA_FMT("%+.1e")>(1.5f));
+    BOOST_TEST_EQ("-1.5e+00", generate_and_system_compare<PRIMA_FMT("%+.1e")>(-1.5f));
+    BOOST_TEST_EQ("5.0e-02", generate_and_system_compare<PRIMA_FMT("%.1e")>(0.05f));
+    BOOST_TEST_EQ("-5.0e-02", generate_and_system_compare<PRIMA_FMT("%.1e")>(-0.05f));
+    BOOST_TEST_EQ("1.000050e+05", generate_and_system_compare<PRIMA_FMT("%e")>(100005.0f));
+    BOOST_TEST_EQ("-1.000050e+05", generate_and_system_compare<PRIMA_FMT("%e")>(-100005.0f));
+    BOOST_TEST_EQ("nan", generate<PRIMA_FMT("%e")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("inf", generate<PRIMA_FMT("%e")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("+nan", generate<PRIMA_FMT("%+e")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("+inf", generate<PRIMA_FMT("%+e")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("-nan", generate<PRIMA_FMT("%e")>(-std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("-inf", generate<PRIMA_FMT("%e")>(-std::numeric_limits<float>::infinity()));
+
+    // scientific format (upper case)
+    BOOST_TEST_EQ("0.000000E+00", generate_and_system_compare<PRIMA_FMT("%E")>(0.0f));
+    BOOST_TEST_EQ("1.000000E+00", generate_and_system_compare<PRIMA_FMT("%E")>(1.0f));
+    BOOST_TEST_EQ("-1.000000E+00", generate_and_system_compare<PRIMA_FMT("%E")>(-1.0f));
+    BOOST_TEST_EQ("1.500000E+00", generate_and_system_compare<PRIMA_FMT("%E")>(1.5f));
+    BOOST_TEST_EQ("-1.500000E+00", generate_and_system_compare<PRIMA_FMT("%E")>(-1.5f));
+    BOOST_TEST_EQ("0.000E+00", generate_and_system_compare<PRIMA_FMT("%.3E")>(0.0f));
+    BOOST_TEST_EQ("1.000E+00", generate_and_system_compare<PRIMA_FMT("%.3E")>(1.0f));
+    BOOST_TEST_EQ("-1.000E+00", generate_and_system_compare<PRIMA_FMT("%.3E")>(-1.0f));
+    BOOST_TEST_EQ("1.500E+00", generate_and_system_compare<PRIMA_FMT("%.3E")>(1.5f));
+    BOOST_TEST_EQ("-1.500E+00", generate_and_system_compare<PRIMA_FMT("%.3E")>(-1.5f));
+    BOOST_TEST_EQ("0E+00", generate_and_system_compare<PRIMA_FMT("%.0E")>(0.0f));
+    BOOST_TEST_EQ("1E+00", generate_and_system_compare<PRIMA_FMT("%.0E")>(1.0f));
+    BOOST_TEST_EQ("-1E+00", generate_and_system_compare<PRIMA_FMT("%.0E")>(-1.0f));
+    BOOST_TEST_EQ("2E+00", generate_and_system_compare<PRIMA_FMT("%.0E")>(1.5f));
+    BOOST_TEST_EQ("-2E+00", generate_and_system_compare<PRIMA_FMT("%.0E")>(-1.5f));
+    BOOST_TEST_EQ("0.E+00", generate_and_system_compare<PRIMA_FMT("%#.0E")>(0.0f));
+    BOOST_TEST_EQ("1.E+00", generate_and_system_compare<PRIMA_FMT("%#.0E")>(1.0f));
+    BOOST_TEST_EQ("-1.E+00", generate_and_system_compare<PRIMA_FMT("%#.0E")>(-1.0f));
+    BOOST_TEST_EQ("2.E+00", generate_and_system_compare<PRIMA_FMT("%#.0E")>(1.5f));
+    BOOST_TEST_EQ("-2.E+00", generate_and_system_compare<PRIMA_FMT("%#.0E")>(-1.5f));
+    BOOST_TEST_EQ("0.0000000E+00", generate_and_system_compare<PRIMA_FMT("%#.7E")>(0.0f));
+    BOOST_TEST_EQ("1.0000000E+00", generate_and_system_compare<PRIMA_FMT("%#.7E")>(1.0f));
+    BOOST_TEST_EQ("-1.0000000E+00", generate_and_system_compare<PRIMA_FMT("%#.7E")>(-1.0f));
+    BOOST_TEST_EQ("1.5000000E+00", generate_and_system_compare<PRIMA_FMT("%#.7E")>(1.5f));
+    BOOST_TEST_EQ("-1.5000000E+00", generate_and_system_compare<PRIMA_FMT("%#.7E")>(-1.5f));
+    BOOST_TEST_EQ(" 0.0E+00", generate_and_system_compare<PRIMA_FMT("% .1E")>(0.0f));
+    BOOST_TEST_EQ(" 1.0E+00", generate_and_system_compare<PRIMA_FMT("% .1E")>(1.0f));
+    BOOST_TEST_EQ("-1.0E+00", generate_and_system_compare<PRIMA_FMT("% .1E")>(-1.0f));
+    BOOST_TEST_EQ(" 1.5E+00", generate_and_system_compare<PRIMA_FMT("% .1E")>(1.5f));
+    BOOST_TEST_EQ("-1.5E+00", generate_and_system_compare<PRIMA_FMT("% .1E")>(-1.5f));
+    BOOST_TEST_EQ("+0.0E+00", generate_and_system_compare<PRIMA_FMT("%+.1E")>(0.0f));
+    BOOST_TEST_EQ("+1.0E+00", generate_and_system_compare<PRIMA_FMT("%+.1E")>(1.0f));
+    BOOST_TEST_EQ("-1.0E+00", generate_and_system_compare<PRIMA_FMT("%+.1E")>(-1.0f));
+    BOOST_TEST_EQ("+1.5E+00", generate_and_system_compare<PRIMA_FMT("%+.1E")>(1.5f));
+    BOOST_TEST_EQ("-1.5E+00", generate_and_system_compare<PRIMA_FMT("%+.1E")>(-1.5f));
+    BOOST_TEST_EQ("5.0E-02", generate_and_system_compare<PRIMA_FMT("%.1E")>(0.05f));
+    BOOST_TEST_EQ("-5.0E-02", generate_and_system_compare<PRIMA_FMT("%.1E")>(-0.05f));
+    BOOST_TEST_EQ("1.000050E+05", generate_and_system_compare<PRIMA_FMT("%E")>(100005.0f));
+    BOOST_TEST_EQ("-1.000050E+05", generate_and_system_compare<PRIMA_FMT("%E")>(-100005.0f));
+    BOOST_TEST_EQ("NAN", generate<PRIMA_FMT("%E")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("INF", generate<PRIMA_FMT("%E")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("+NAN", generate<PRIMA_FMT("%+E")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("+INF", generate<PRIMA_FMT("%+E")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("-NAN", generate<PRIMA_FMT("%E")>(-std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("-INF", generate<PRIMA_FMT("%E")>(-std::numeric_limits<float>::infinity()));
+
+    // optimal format
+    BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%g")>(0.0f));
+    BOOST_TEST_EQ("1", generate_and_system_compare<PRIMA_FMT("%g")>(1.0f));
+    BOOST_TEST_EQ("-1", generate_and_system_compare<PRIMA_FMT("%g")>(-1.0f));
+    BOOST_TEST_EQ("1.5", generate_and_system_compare<PRIMA_FMT("%g")>(1.5f));
+    BOOST_TEST_EQ("-1.5", generate_and_system_compare<PRIMA_FMT("%g")>(-1.5f));
+    BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%.3g")>(0.0f));
+    BOOST_TEST_EQ("1", generate_and_system_compare<PRIMA_FMT("%.3g")>(1.0f));
+    BOOST_TEST_EQ("-1", generate_and_system_compare<PRIMA_FMT("%.3g")>(-1.0f));
+    BOOST_TEST_EQ("1.5", generate_and_system_compare<PRIMA_FMT("%.3g")>(1.5f));
+    BOOST_TEST_EQ("-1.5", generate_and_system_compare<PRIMA_FMT("%.3g")>(-1.5f));
+    BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%.0g")>(0.0f));
+    BOOST_TEST_EQ("1", generate_and_system_compare<PRIMA_FMT("%.0g")>(1.0f));
+    BOOST_TEST_EQ("-1", generate_and_system_compare<PRIMA_FMT("%.0g")>(-1.0f));
+    BOOST_TEST_EQ("2", generate_and_system_compare<PRIMA_FMT("%.0g")>(1.5f));
+    BOOST_TEST_EQ("-2", generate_and_system_compare<PRIMA_FMT("%.0g")>(-1.5f));
+    BOOST_TEST_EQ("0.", generate_and_system_compare<PRIMA_FMT("%#.0g")>(0.0f));
+    BOOST_TEST_EQ("1.", generate_and_system_compare<PRIMA_FMT("%#.0g")>(1.0f));
+    BOOST_TEST_EQ("-1.", generate_and_system_compare<PRIMA_FMT("%#.0g")>(-1.0f));
+    BOOST_TEST_EQ("2.", generate_and_system_compare<PRIMA_FMT("%#.0g")>(1.5f));
+    BOOST_TEST_EQ("-2.", generate_and_system_compare<PRIMA_FMT("%#.0g")>(-1.5f));
+    BOOST_TEST_EQ("0.000000", generate_and_system_compare<PRIMA_FMT("%#.7g")>(0.0f));
+    BOOST_TEST_EQ("1.000000", generate_and_system_compare<PRIMA_FMT("%#.7g")>(1.0f));
+    BOOST_TEST_EQ("-1.000000", generate_and_system_compare<PRIMA_FMT("%#.7g")>(-1.0f));
+    BOOST_TEST_EQ("1.500000", generate_and_system_compare<PRIMA_FMT("%#.7g")>(1.5f));
+    BOOST_TEST_EQ("-1.500000", generate_and_system_compare<PRIMA_FMT("%#.7g")>(-1.5f));
+    BOOST_TEST_EQ(" 0", generate_and_system_compare<PRIMA_FMT("% .1g")>(0.0f));
+    BOOST_TEST_EQ(" 1", generate_and_system_compare<PRIMA_FMT("% .1g")>(1.0f));
+    BOOST_TEST_EQ("-1", generate_and_system_compare<PRIMA_FMT("% .1g")>(-1.0f));
+    BOOST_TEST_EQ(" 2", generate_and_system_compare<PRIMA_FMT("% .1g")>(1.5f));
+    BOOST_TEST_EQ("-2", generate_and_system_compare<PRIMA_FMT("% .1g")>(-1.5f));
+    BOOST_TEST_EQ("+0", generate_and_system_compare<PRIMA_FMT("%+.1g")>(0.0f));
+    BOOST_TEST_EQ("+1", generate_and_system_compare<PRIMA_FMT("%+.1g")>(1.0f));
+    BOOST_TEST_EQ("-1", generate_and_system_compare<PRIMA_FMT("%+.1g")>(-1.0f));
+    BOOST_TEST_EQ("+2", generate_and_system_compare<PRIMA_FMT("%+.1g")>(1.5f));
+    BOOST_TEST_EQ("-2", generate_and_system_compare<PRIMA_FMT("%+.1g")>(-1.5f));
+    BOOST_TEST_EQ("0.05", generate_and_system_compare<PRIMA_FMT("%.1g")>(0.05f));
+    BOOST_TEST_EQ("-0.05", generate_and_system_compare<PRIMA_FMT("%.1g")>(-0.05f));
+    BOOST_TEST_EQ("100005", generate_and_system_compare<PRIMA_FMT("%g")>(100005.0f));
+    BOOST_TEST_EQ("-100005", generate_and_system_compare<PRIMA_FMT("%g")>(-100005.0f));
+    BOOST_TEST_EQ("1.00001e+06", generate_and_system_compare<PRIMA_FMT("%g")>(1000005.0f));
+    BOOST_TEST_EQ("-1.00001e+06", generate_and_system_compare<PRIMA_FMT("%g")>(-1000005.0f));
+    BOOST_TEST_EQ("1.0001e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(100005.0f));
+    BOOST_TEST_EQ("-1.0001e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(-100005.0f));
 }
 
 void int_tests()
@@ -119,11 +312,19 @@ void unsigned_tests()
     BOOST_TEST_EQ("ffffffffffffffff", generate<PRIMA_FMT("%x")>(std::numeric_limits<std::uint64_t>::max()));
     BOOST_TEST_EQ("0064", generate_and_system_compare<PRIMA_FMT("%.4x")>(100u));
     BOOST_TEST_EQ(" 0064", generate_and_system_compare<PRIMA_FMT("%5.4x")>(100u));
+
+    // upper case hex
+    BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%X")>(0u));
+    BOOST_TEST_EQ("64", generate_and_system_compare<PRIMA_FMT("%X")>(100u));
+    BOOST_TEST_EQ("FFFFFFFFFFFFFFFF", generate<PRIMA_FMT("%X")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("0064", generate_and_system_compare<PRIMA_FMT("%.4X")>(100u));
+    BOOST_TEST_EQ(" 0064", generate_and_system_compare<PRIMA_FMT("%5.4X")>(100u));
 }
 
 int main()
 {
     BOOST_TEST_EQ("<-->", generate<PRIMA_FMT("<-->")>());
+    BOOST_TEST_EQ("<-%->", generate<PRIMA_FMT("<-%%->")>());
     float_tests();
     int_tests();
     string_tests();

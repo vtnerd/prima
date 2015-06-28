@@ -10,40 +10,29 @@ namespace ir
 {
     namespace output
     {
-        template <typename Inner> struct upper_case
+        //
+        // float
+        //
+        template <typename Fields> struct float_
         {
-            using type = upper_case;
-            using inner = Inner;
-        };
-
-        template <typename Fields, typename Inner> struct width
-        {
-            using type = width;
-            using fields = Fields;
-            using inner = Inner;
-        };
-
-        template <typename Fields, typename Inner, typename Field>
-        constexpr bool
-        has_field(const width<Fields, Inner> &, const Field &) noexcept
-        {
-            namespace fields_ = ::prima::ir::output::fields;
-            return is_field<Field, fields_::format_field>::value;
-        }
-
-        template <typename Fields> struct string
-        {
-            using type = string;
+            using type = float_;
             using fields = Fields;
         };
 
         template <typename Fields, typename Field>
-        constexpr bool has_field(const string<Fields> &, const Field &) noexcept
+        constexpr bool has_field(const float_<Fields> &, const Field &) noexcept
         {
             namespace fields_ = ::prima::ir::output::fields;
-            return is_field<Field, fields_::type_field>::value;
+            return is_any_field<Field,
+                                fields_::format_field,
+                                fields_::numeric_field,
+                                fields_::signed_numeric_field,
+                                fields_::real_field>::value;
         }
 
+        //
+        // int
+        //
         template <typename Fields> struct int_
         {
             using type = int_;
@@ -55,11 +44,32 @@ namespace ir
         {
             namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
-                                fields_::type_field,
+                                fields_::format_field,
                                 fields_::numeric_field,
-                                fields_::signed_numeric_field>::value;
+                                fields_::signed_numeric_field>::value &&
+                   Field::value != fields_::upper_case::value;
         }
 
+        //
+        // string
+        //
+        template <typename Fields> struct string
+        {
+            using type = string;
+            using fields = Fields;
+        };
+
+        template <typename Fields, typename Field>
+        constexpr bool has_field(const string<Fields> &, const Field &) noexcept
+        {
+            namespace fields_ = ::prima::ir::output::fields;
+            return is_field<Field, fields_::format_field>::value &&
+                   Field::value != fields_::upper_case::value;
+        }
+
+        //
+        // unsigned
+        //
         template <typename Fields> struct unsigned_
         {
             using type = unsigned_;
@@ -72,25 +82,8 @@ namespace ir
         {
             namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
-                                fields_::type_field,
+                                fields_::format_field,
                                 fields_::numeric_field>::value;
-        }
-
-        template <typename Fields> struct float_
-        {
-            using type = float_;
-            using fields = Fields;
-        };
-
-        template <typename Fields, typename Field>
-        constexpr bool has_field(const float_<Fields> &, const Field &) noexcept
-        {
-            namespace fields_ = ::prima::ir::output::fields;
-            return is_any_field<Field,
-                                fields_::type_field,
-                                fields_::numeric_field,
-                                fields_::signed_numeric_field,
-                                fields_::real_field>::value;
         }
     } // output
 } // ir

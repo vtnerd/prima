@@ -14,9 +14,14 @@ namespace ir
         namespace make
         {
             template <values::real_format Format,
+                      typename Case = values::lower_case,
                       typename Radix = values::radix<10>>
             using float_ = ::prima::ir::output::float_<
-                meta::vector<values::precision<6>,
+                meta::vector<values::right_justified,
+                             values::precision<6>,
+                             Case,
+                             meta::void_, // width
+                             values::pad_with_space,
                              Radix,
                              values::use_standard_format,
                              values::only_print_negative_sign,
@@ -25,30 +30,32 @@ namespace ir
 
             template <typename Radix = values::radix<10>>
             using int_ = ::prima::ir::output::int_<
-                meta::vector<values::precision<1>,
+                meta::vector<values::right_justified,
+                             values::precision<1>,
+                             values::lower_case,
+                             meta::void_, // width
+                             values::pad_with_space,
                              Radix,
                              values::use_standard_format,
                              values::only_print_negative_sign,
                              values::no_extra_blank_on_positive>>;
 
-            using string = ::prima::ir::output::string<meta::vector<meta::void_>>;
+            using string = ::prima::ir::output::string<
+                meta::vector<values::right_justified,
+                             meta::void_,   // precision
+                             meta::void_,   // casing
+                             meta::void_>>; // width
 
-            template <typename Inner>
-            using upper_case = ::prima::ir::output::upper_case<Inner>;
-
-            template <typename Radix = values::radix<10>>
+            template <typename Radix = values::radix<10>,
+                      typename Case = values::lower_case>
             using unsigned_ = ::prima::ir::output::unsigned_<
-                meta::vector<values::precision<1>,
+                meta::vector<values::right_justified,
+                             values::precision<1>,
+                             Case,
+                             meta::void_, // width
+                             values::pad_with_space,
                              Radix,
                              values::use_standard_format>>;
-
-            template <typename Width, typename Inner>
-            using width = ::prima::ir::output::width<
-                meta::vector<values::right_justified,
-                             values::pad_character<' '>,
-                             values::width<Width::value>>,
-                Inner>;
-
         } // make
     }     // output
 } // ir

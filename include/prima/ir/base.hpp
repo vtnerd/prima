@@ -8,6 +8,9 @@ namespace prima
 {
 namespace ir
 {
+    ////////////////////////////////////////////////////////////////////////////
+    // Basic IR Elements                                                      //
+    ////////////////////////////////////////////////////////////////////////////
     template <char... Values> using literal = meta::string<Values...>;
 
     template <typename Left, typename Right> struct sequence
@@ -17,7 +20,9 @@ namespace ir
         using right = Right;
     };
 
-
+    ////////////////////////////////////////////////////////////////////////////
+    // Basic IR Functions                                                     //
+    ////////////////////////////////////////////////////////////////////////////
     template <typename Fields, typename Field>
     using get_field_t = meta::at_t<Fields, Field>;
 

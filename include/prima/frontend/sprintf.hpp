@@ -33,117 +33,54 @@ namespace frontend
         namespace mp = mpllibs::metaparse;
         namespace oir = ir::output;
 
-        class generate_format_func
+        struct generate_format_func
         {
-        private:
-            template <typename Width, typename Type> struct state
-            {
-                using width = Width;
-                using type = Type;
+            constexpr const static unsigned flags_loc = 0;
+            constexpr const static unsigned width_loc = 1;
+            constexpr const static unsigned precision_loc = 2;
+            constexpr const static unsigned format_loc = 3;
 
-                struct width_with_type
-                {
-                    using type = oir::width<typename Width::fields, Type>;
-                };
-            };
-
-            template <bool IsWidthField,
-                      typename State,
-                      typename Field,
-                      typename Value>
-            struct next_state
-            {
-                using type = state<
-                    typename State::width,
-                    ir::manip::update_fields_t<
-                        typename State::type,
-                        ir::manip::update_field_t<typename State::type::fields,
-                                                  Field,
-                                                  Value>>>;
-            };
-
-            template <typename State, typename Field, typename Value>
-            struct next_state<true, State, Field, Value>
-            {
-                using type = state<
-                    ir::manip::update_fields_t<
-                        typename State::width,
-                        ir::manip::update_field_t<typename State::width::fields,
-                                                  Field,
-                                                  Value>>,
-                    typename State::type>;
-            };
-
-            struct update_state_func
-            {
-                template <typename State, typename FieldValue> class apply
-                {
-                private:
-                    using field = meta::at_ct<FieldValue, 0>;
-                    constexpr const static bool is_width_field =
-                        ir::has_field(typename State::width{}, field{});
-                    constexpr const static bool is_type_field =
-                        ir::has_field(typename State::type{}, field{});
-                    static_assert(is_width_field != is_type_field,
-                                  "invalid field for type");
-
-                public:
-                    using type =
-                        typename next_state<is_width_field,
-                                            State,
-                                            field,
-                                            meta::at_ct<FieldValue, 1>>::type;
-                };
-            };
-
-        public:
-            template <typename Sequence> class apply
+            template <typename Formatting> class apply
             {
             private:
-                using width_uint = meta::at_ct<Sequence, 1>;
-                using precision_uint = meta::at_ct<Sequence, 2>;
-                using output_type = meta::at_ct<Sequence, 3>;
+                using width = meta::at_ct<Formatting, width_loc>;
+                using precision = meta::at_ct<Formatting, precision_loc>;
+                using format = meta::at_ct<Formatting, format_loc>;
 
-                static_assert(ir::has_field(output_type{},
-                                            oir::fields::precision{}),
-                              "invalid type field");
+                static_assert(ir::has_field(format{}, oir::fields::precision{}),
+                              "invalid format field");
 
                 using normalized_precision =
-                    meta::if_t<meta::is_void_<precision_uint>,
+                    meta::if_t<meta::is_void_<precision>,
                                meta::unsigned_<0>,
-                               precision_uint>;
+                               precision>;
 
-                using type_with_precision = meta::eval_if_t<
-                    meta::is_void_<precision_uint>,
-                    output_type,
-                    meta::lazy<ir::manip::update_fields_func,
-                               output_type,
-                               ir::manip::update_field<
-                                   typename output_type::fields,
-                                   oir::fields::precision,
-                                   oir::values::precision<
-                                       normalized_precision::value>>>>;
+                using format_with_precision = meta::eval_if_t<
+                    meta::is_void_<precision>,
+                    format,
+                    ir::manip::update_field<
+                        format,
+                        oir::fields::precision,
+                        oir::values::precision<normalized_precision::value>>>;
 
-                using normalized_width = meta::if_t<meta::is_void_<width_uint>,
-                                                    meta::unsigned_<0>,
-                                                    width_uint>;
+                using normalized_width =
+                    meta::if_t<meta::is_void_<width>, meta::unsigned_<0>, width>;
 
-                using start_state = meta::if_t<
-                    meta::is_void_<width_uint>,
-                    state<meta::void_, type_with_precision>,
-                    state<oir::make::width<normalized_width, meta::void_>,
-                          type_with_precision>>;
-
-                // Fold flags. Flags invalid for type are aborted immediately
-                using final_state = meta::fold_t<meta::at_ct<Sequence, 0>,
-                                                 start_state,
-                                                 update_state_func>;
+                using format_without_flags = meta::eval_if_t<
+                    meta::is_void_<width>,
+                    format_with_precision,
+                    ir::manip::update_field<
+                        format_with_precision,
+                        oir::fields::width,
+                        oir::values::width<normalized_width::value>>>;
 
             public:
-                using type =
-                    meta::eval_if_t<meta::is_void_<typename final_state::width>,
-                                    final_state,
-                                    typename final_state::width_with_type>;
+                using type = meta::fold_t<meta::at_ct<Formatting, flags_loc>,
+                                          format_without_flags,
+                                          ir::manip::update_field_func>;
+
+                static_assert(ir::has_field(type{}, oir::fields::precision{}),
+                              "internal error");
             };
         };
 
@@ -159,15 +96,18 @@ namespace frontend
                          oir::make::float_<oir::values::real_format::fixed,
                                            oir::values::radix<16>>>,
             mp::always_c<'A',
-                         oir::make::upper_case<
-                             oir::make::float_<oir::values::real_format::fixed,
-                                               oir::values::radix<16>>>>,
+                         oir::make::float_<oir::values::real_format::fixed,
+                                           oir::values::upper_case,
+                                           oir::values::radix<16>>>,
             mp::always_c<'e',
                          oir::make::float_<oir::values::real_format::scientific>>,
             mp::always_c<'E',
-                         oir::make::upper_case<oir::make::float_<
-                             oir::values::real_format::scientific>>>,
+                         oir::make::float_<oir::values::real_format::scientific,
+                                           oir::values::upper_case>>,
             mp::always_c<'f', oir::make::float_<oir::values::real_format::fixed>>,
+            mp::always_c<'F',
+                         oir::make::float_<oir::values::real_format::fixed,
+                                           oir::values::upper_case>>,
             mp::always_c<'g',
                          oir::make::float_<oir::values::real_format::optimal>>,
             mp::always_c<'G',
@@ -177,8 +117,8 @@ namespace frontend
             mp::always_c<'u', oir::make::unsigned_<>>,
             mp::always_c<'x', oir::make::unsigned_<oir::values::radix<16>>>,
             mp::always_c<'X',
-                         oir::make::upper_case<
-                             oir::make::unsigned_<oir::values::radix<16>>>>>;
+                         oir::make::unsigned_<oir::values::radix<16>,
+                                              oir::values::upper_case>>>;
 
         using flags = mp::any<mp::one_of<
             mp::always_c<
@@ -192,9 +132,8 @@ namespace frontend
                 meta::vector<oir::fields::always_print_sign, meta::true_>>,
             mp::always_c<'-',
                          meta::vector<oir::fields::left_justified, meta::true_>>,
-            mp::always_c<
-                '0',
-                meta::vector<oir::fields::pad_character, meta::char_<'0'>>>>>;
+            mp::always_c<'0',
+                         meta::vector<oir::fields::pad_with_zero, meta::true_>>>>;
         using width = mp::one_of<int_, mp::return_<meta::void_>>;
         using precision = mp::one_of<mp::last_of<mp::lit_c<'.'>, int_>,
                                      mp::return_<meta::void_>>;

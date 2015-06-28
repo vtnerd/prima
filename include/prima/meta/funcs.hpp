@@ -20,6 +20,9 @@ namespace meta
     using at_t = typename boost::mpl::at<Sequence, Location>::type;
 
     template <typename Sequence, unsigned Location>
+    using at_c = boost::mpl::at_c<Sequence, Location>;
+
+    template <typename Sequence, unsigned Location>
     using at_ct = typename boost::mpl::at_c<Sequence, Location>::type;
 
     template <typename F, typename... A>
