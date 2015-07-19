@@ -153,8 +153,10 @@ namespace backend
                 {
                     return 0;
                 }
-                return traits::truncate_to_long::call(
+                const long raw_exp = traits::truncate_to_long::call(
                     log10(traits::get_absolute_value(value)));
+
+                return traits::test_negative(raw_exp) ? raw_exp - 1 : raw_exp;
             }
 
             template <typename OutputIterator>
@@ -380,6 +382,7 @@ namespace backend
                                 precision_ <=
                                     std::numeric_limits<unsigned>::max() - 3,
                                 "");
+
                             return static_cast<long long>(precision_) -
                                    (get_exponent(value) + 1);
 

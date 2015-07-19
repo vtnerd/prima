@@ -274,6 +274,14 @@ void float_tests()
     BOOST_TEST_EQ("-2", generate_and_system_compare<PRIMA_FMT("%+.1g")>(-1.5f));
     BOOST_TEST_EQ("0.05", generate_and_system_compare<PRIMA_FMT("%.1g")>(0.05f));
     BOOST_TEST_EQ("-0.05", generate_and_system_compare<PRIMA_FMT("%.1g")>(-0.05f));
+    BOOST_TEST_EQ("0.0005", generate_and_system_compare<PRIMA_FMT("%.1g")>(0.0005f));
+    BOOST_TEST_EQ("-0.0005", generate_and_system_compare<PRIMA_FMT("%.6g")>(-0.0005f));
+    BOOST_TEST_EQ(" 0.0005", generate_and_system_compare<PRIMA_FMT("% .6g")>(0.0005f));
+    BOOST_TEST_EQ("+0.0005", generate_and_system_compare<PRIMA_FMT("%+.6g")>(0.0005f));
+    BOOST_TEST_EQ("5e-05", generate_and_system_compare<PRIMA_FMT("%.6g")>(0.00005f));
+    BOOST_TEST_EQ("-5e-05", generate_and_system_compare<PRIMA_FMT("%.6g")>(-0.00005f));
+    BOOST_TEST_EQ(" 5e-05", generate_and_system_compare<PRIMA_FMT("% .6g")>(0.00005f));
+    BOOST_TEST_EQ("+5e-05", generate_and_system_compare<PRIMA_FMT("%+.6g")>(0.00005f));
     BOOST_TEST_EQ("100005", generate_and_system_compare<PRIMA_FMT("%g")>(100005.0f));
     BOOST_TEST_EQ("-100005", generate_and_system_compare<PRIMA_FMT("%g")>(-100005.0f));
     BOOST_TEST_EQ("1.00001e+06", generate_and_system_compare<PRIMA_FMT("%g")>(1000005.0f));
