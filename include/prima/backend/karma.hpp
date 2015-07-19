@@ -32,6 +32,11 @@ namespace backend
     class karma
     {
     private:
+        /* Be careful with c++14 automatic return type deduction. During
+         * overload selection, all such functions must be instantiated in their
+         * entirety. This section uses class partial-template specialization to
+         * limit the overload selection where possible. */
+
         ////////////////////////////////////////////////////////////////////////
         // Generic Output Functions                                           //
         ////////////////////////////////////////////////////////////////////////
@@ -41,27 +46,32 @@ namespace backend
         //
         struct upper_case
         {
-            template <typename Inner>
-            static auto apply(const Inner &inner,
-                              const ir::output::values::upper_case &)
+            template <typename Inner, typename Case> struct impl
             {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::upper[inner]);
-            }
+                static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        boost::spirit::karma::upper[inner]);
+                }
+            };
+
 
             template <typename Inner>
-            static auto apply(const Inner &inner,
-                              const ir::output::values::lower_case &)
+            struct impl<Inner, ir::output::values::lower_case>
             {
-                return boost::proto::deep_copy(inner);
-            }
+                static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(inner);
+                }
+            };
 
             template <typename Fields, typename Inner>
-            static auto apply(const Inner &inner)
+            static auto apply(const Inner& inner)
             {
-                return apply(
-                    inner,
-                    ir::get_field_t<Fields, ir::output::fields::upper_case>{});
+                return impl<
+                    Inner,
+                    ir::get_field_t<Fields, ir::output::fields::upper_case>>::
+                    apply(inner);
             }
         };
 
@@ -70,44 +80,50 @@ namespace backend
         //
         struct width
         {
+            template <typename, typename, typename> struct impl;
+
             template <typename Inner, typename Justification>
-            static auto apply(const Inner &inner,
-                              const char,
-                              const meta::void_ &,
-                              const Justification &)
+            struct impl<Inner, meta::void_, Justification>
             {
-                return boost::proto::deep_copy(inner);
-            }
+                static auto apply(const Inner& inner, const char)
+                {
+                    return boost::proto::deep_copy(inner);
+                }
+            };
 
             template <typename Inner, unsigned Width>
-            static auto apply(const Inner &inner,
-                              const char pad,
-                              const ir::output::values::width<Width> &,
-                              const ir::output::values::left_justified &)
+            struct impl<Inner,
+                        ir::output::values::width<Width>,
+                        ir::output::values::left_justified>
             {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::left_align(Width, pad)[inner]);
-            }
+                static auto apply(const Inner& inner, const char pad)
+                {
+                    return boost::proto::deep_copy(
+                        boost::spirit::karma::left_align(Width, pad)[inner]);
+                }
+            };
 
             template <typename Inner, unsigned Width>
-            static auto apply(const Inner &inner,
-                              const char pad,
-                              const ir::output::values::width<Width> &,
-                              const ir::output::values::right_justified &)
+            struct impl<Inner,
+                        ir::output::values::width<Width>,
+                        ir::output::values::right_justified>
             {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::right_align(Width, pad)[inner]);
-            }
+                static auto apply(const Inner& inner, const char pad)
+                {
+                    return boost::proto::deep_copy(
+                        boost::spirit::karma::right_align(Width, pad)[inner]);
+                }
+            };
 
             template <typename Fields, typename Inner>
-            static auto apply(const Inner &inner, const char pad)
+            static auto apply(const Inner& inner, const char pad)
             {
                 namespace fields = ir::output::fields;
                 using justification =
                     ir::get_field_t<Fields, fields::left_justified>;
                 using width = ir::get_field_t<Fields, fields::width>;
 
-                return apply(inner, pad, width{}, justification{});
+                return impl<Inner, width, justification>::apply(inner, pad);
             }
         };
 
@@ -160,7 +176,7 @@ namespace backend
                 using base = boost::spirit::karma::real_policies<double>;
 
                 template <typename OutputIterator>
-                static bool dot(OutputIterator &sink,
+                static bool dot(OutputIterator& sink,
                                 const double fractional,
                                 const unsigned precision)
                 {
@@ -190,7 +206,7 @@ namespace backend
                 template <typename CharEncoding,
                           typename Tag,
                           typename OutputIterator>
-                static bool exponent(OutputIterator &sink, const long n)
+                static bool exponent(OutputIterator& sink, const long n)
                 {
                     namespace karma = boost::spirit::karma;
 
@@ -245,7 +261,7 @@ namespace backend
                 }
 
                 template <typename OutputIterator>
-                static bool fraction_part(OutputIterator &sink,
+                static bool fraction_part(OutputIterator& sink,
                                           double n,
                                           unsigned precision_,
                                           unsigned precision)
@@ -272,7 +288,7 @@ namespace backend
                 }
 
                 template <typename OutputIterator>
-                static bool integer_part(OutputIterator &sink,
+                static bool integer_part(OutputIterator& sink,
                                          const double n,
                                          const bool sign,
                                          const bool)
@@ -316,11 +332,6 @@ namespace backend
                 {
                     switch (representation())
                     {
-                    default:
-                    case ir::output::values::real_format::fixed:
-                    case ir::output::values::real_format::scientific:
-                        return desired_precision();
-
                     case ir::output::values::real_format::optimal:
                     {
                         constexpr const unsigned precision_ =
@@ -345,7 +356,14 @@ namespace backend
                             return precision_ - 1;
                         }
                     }
+
+                    default:
+                    case ir::output::values::real_format::fixed:
+                    case ir::output::values::real_format::scientific:
+                        break;
                     }
+
+                    return desired_precision();
                 }
 
                 static bool trailing_zeros(double) noexcept
@@ -417,22 +435,29 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::unsigned_<Fields>>
         {
-            template <typename Inner>
-            static const Inner &
-            add_precision(const Inner &inner,
-                          const ir::output::values::precision<1> &)
-            {
-                return inner;
-            }
+            template <typename, typename> struct add_precision;
 
-            template <typename Inner, unsigned Precision>
-            static auto add_precision(
-                const Inner &inner,
-                const ir::output::values::precision<Precision> &)
+            template <typename Ignored>
+            struct add_precision<ir::output::values::precision<1>, Ignored>
             {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::right_align(Precision, '0')[inner]);
-            }
+                template <typename Inner>
+                static const Inner& apply(const Inner& inner)
+                {
+                    return inner;
+                }
+            };
+
+            template <unsigned Precision, typename Ignored>
+            struct add_precision<ir::output::values::precision<Precision>,
+                                 Ignored>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        boost::spirit::karma::right_align(Precision,
+                                                          '0')[inner]);
+                }
+            };
 
             static auto apply()
             {
@@ -457,7 +482,8 @@ namespace backend
                 using uint_generator =
                     boost::spirit::karma::uint_generator<unsigned, radix>;
                 return upper_case::apply<Fields>(width::apply<Fields>(
-                    add_precision(uint_generator{}, precision{}), pad));
+                    add_precision<precision, bool>::apply(uint_generator{}),
+                    pad));
             }
         };
 
@@ -467,7 +493,7 @@ namespace backend
         template <char... Characters>
         struct generate_tree<ir::literal<Characters...>>
         {
-            static const char *apply()
+            static const char* apply()
             {
                 constexpr const static char literal_[] = {Characters..., 0};
                 return literal_;
@@ -480,21 +506,24 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::string<Fields>>
         {
-            template <typename Inner>
-            static const Inner &
-            add_precision(const Inner &inner, const meta::void_ &)
+            template <typename> struct add_precision
             {
-                return inner;
-            }
+                template <typename Inner>
+                static const Inner& apply(const Inner& inner)
+                {
+                    return inner;
+                }
+            };
 
-            template <typename Inner, unsigned Precision>
-            static auto add_precision(
-                const Inner &inner,
-                const ir::output::values::precision<Precision> &)
+            template <unsigned Precision>
+            struct add_precision<ir::output::values::precision<Precision>>
             {
-                return boost::proto::deep_copy(
-                    boost::spirit::karma::maxwidth(Precision)[inner]);
-            }
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        boost::spirit::karma::maxwidth(Precision)[inner]);
+                }
+            };
 
             static auto apply()
             {
@@ -504,8 +533,8 @@ namespace backend
                               "invalid fields");
 
                 return width::apply<Fields>(
-                    add_precision(boost::spirit::karma::string,
-                                  ir::get_field_t<Fields, fields::precision>{}),
+                    add_precision<ir::get_field_t<Fields, fields::precision>>::
+                        apply(boost::spirit::karma::string),
                     ' ');
             }
         };
@@ -538,7 +567,7 @@ namespace backend
         //!
         //! \return Result of `boost::spirit::karma::generate`.
         template <typename IR, typename Iterator>
-        static bool generate(Iterator &&iterator)
+        static bool generate(Iterator&& iterator)
         {
             return boost::spirit::karma::generate(
                 std::forward<Iterator>(iterator), generate_tree<IR>::apply());
@@ -568,12 +597,12 @@ namespace backend
         //! \return Result of `boost::spirit::karma::generate`.
         template <typename IR, typename Iterator, typename Arg1, typename... Args>
         static bool
-        generate(Iterator &&iterator, const Arg1 &arg1, const Args &... args)
+        generate(Iterator&& iterator, const Arg1& arg1, const Args&... args)
         {
             return boost::spirit::karma::generate(
                 std::forward<Iterator>(iterator),
                 generate_tree<IR>::apply(),
-                std::tie<const Arg1 &, const Args &...>(arg1, args...));
+                std::tie<const Arg1&, const Args&...>(arg1, args...));
         }
     };
 } // convert

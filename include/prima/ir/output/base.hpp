@@ -20,7 +20,7 @@ namespace ir
         };
 
         template <typename Fields, typename Field>
-        constexpr bool has_field(const float_<Fields> &, const Field &) noexcept
+        constexpr bool has_field(const float_<Fields>&, const Field&) noexcept
         {
             namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
@@ -40,7 +40,7 @@ namespace ir
         };
 
         template <typename Fields, typename Field>
-        constexpr bool has_field(const int_<Fields> &, const Field &) noexcept
+        constexpr bool has_field(const int_<Fields>&, const Field&) noexcept
         {
             namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
@@ -60,7 +60,7 @@ namespace ir
         };
 
         template <typename Fields, typename Field>
-        constexpr bool has_field(const string<Fields> &, const Field &) noexcept
+        constexpr bool has_field(const string<Fields>&, const Field&) noexcept
         {
             namespace fields_ = ::prima::ir::output::fields;
             return is_field<Field, fields_::format_field>::value &&
@@ -78,7 +78,7 @@ namespace ir
 
         template <typename Fields, typename Field>
         constexpr bool
-        has_field(const unsigned_<Fields> &, const Field &) noexcept
+        has_field(const unsigned_<Fields>&, const Field&) noexcept
         {
             namespace fields_ = ::prima::ir::output::fields;
             return is_any_field<Field,
