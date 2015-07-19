@@ -86,6 +86,8 @@ void float_tests()
     BOOST_TEST_EQ("inf", generate<PRIMA_FMT("%f")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("+nan", generate<PRIMA_FMT("%+f")>(std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("+inf", generate<PRIMA_FMT("%+f")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ(" nan", generate<PRIMA_FMT("% f")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ(" inf", generate<PRIMA_FMT("% f")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("-nan", generate<PRIMA_FMT("%f")>(-std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("-inf", generate<PRIMA_FMT("%f")>(-std::numeric_limits<float>::infinity()));
 
@@ -131,6 +133,8 @@ void float_tests()
     BOOST_TEST_EQ("INF", generate<PRIMA_FMT("%F")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("+NAN", generate<PRIMA_FMT("%+F")>(std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("+INF", generate<PRIMA_FMT("%+F")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ(" NAN", generate<PRIMA_FMT("% F")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ(" INF", generate<PRIMA_FMT("% F")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("-NAN", generate<PRIMA_FMT("%F")>(-std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("-INF", generate<PRIMA_FMT("%F")>(-std::numeric_limits<float>::infinity()));
 
@@ -178,6 +182,8 @@ void float_tests()
     BOOST_TEST_EQ("inf", generate<PRIMA_FMT("%e")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("+nan", generate<PRIMA_FMT("%+e")>(std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("+inf", generate<PRIMA_FMT("%+e")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ(" nan", generate<PRIMA_FMT("% e")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ(" inf", generate<PRIMA_FMT("% e")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("-nan", generate<PRIMA_FMT("%e")>(-std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("-inf", generate<PRIMA_FMT("%e")>(-std::numeric_limits<float>::infinity()));
 
@@ -225,6 +231,8 @@ void float_tests()
     BOOST_TEST_EQ("INF", generate<PRIMA_FMT("%E")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("+NAN", generate<PRIMA_FMT("%+E")>(std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("+INF", generate<PRIMA_FMT("%+E")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ(" NAN", generate<PRIMA_FMT("% E")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ(" INF", generate<PRIMA_FMT("% E")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("-NAN", generate<PRIMA_FMT("%E")>(-std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("-INF", generate<PRIMA_FMT("%E")>(-std::numeric_limits<float>::infinity()));
 
@@ -272,6 +280,14 @@ void float_tests()
     BOOST_TEST_EQ("-1.00001e+06", generate_and_system_compare<PRIMA_FMT("%g")>(-1000005.0f));
     BOOST_TEST_EQ("1.0001e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(100005.0f));
     BOOST_TEST_EQ("-1.0001e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(-100005.0f));
+    BOOST_TEST_EQ("nan", generate<PRIMA_FMT("%g")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("inf", generate<PRIMA_FMT("%g")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("+nan", generate<PRIMA_FMT("%+g")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("+inf", generate<PRIMA_FMT("%+g")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ(" nan", generate<PRIMA_FMT("% g")>(std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ(" inf", generate<PRIMA_FMT("% g")>(std::numeric_limits<float>::infinity()));
+    BOOST_TEST_EQ("-nan", generate<PRIMA_FMT("%g")>(-std::numeric_limits<float>::quiet_NaN()));
+    BOOST_TEST_EQ("-inf", generate<PRIMA_FMT("%g")>(-std::numeric_limits<float>::infinity()));
 }
 
 void int_tests()

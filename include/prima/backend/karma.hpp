@@ -157,6 +157,38 @@ namespace backend
                     log10(traits::get_absolute_value(value)));
             }
 
+            template <typename OutputIterator>
+            static bool handle_sign(OutputIterator& sink, const bool sign)
+            {
+                namespace karma = boost::spirit::karma;
+                constexpr const bool blank_on_positive = ir::get_field_value<
+                    Fields,
+                    ir::output::fields::extra_blank_on_positive>();
+                constexpr const bool always_print_sign =
+                    ir::get_field_value<Fields,
+                                        ir::output::fields::always_print_sign>();
+
+                static_assert(!(blank_on_positive && always_print_sign),
+                              "invalid ir");
+
+                if (blank_on_positive && !sign)
+                {
+                    if (!karma::char_inserter<>::call(sink, ' '))
+                    {
+                        return false;
+                    }
+                }
+                else if (always_print_sign && !sign)
+                {
+                    if (!karma::char_inserter<>::call(sink, '+'))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
             constexpr static ir::output::values::real_format
             representation() noexcept
             {
@@ -260,6 +292,14 @@ namespace backend
                     }
                 }
 
+                static bool force_sign(double)
+                {
+                    /* Karma doesn't do what we want for 0 values (doesn't print
+                     * '+'), and doesn't add spaces on positive values, so do
+                     * the sign and blank printing for karma. */
+                    return false;
+                }
+
                 template <typename OutputIterator>
                 static bool fraction_part(OutputIterator& sink,
                                           double n,
@@ -287,45 +327,36 @@ namespace backend
                     return r;
                 }
 
+                template <typename CharEncoding,
+                          typename Tag,
+                          typename OutputIterator>
+                static bool
+                inf(OutputIterator& sink, const double n, const bool)
+                {
+                    namespace traits = boost::spirit::traits;
+                    return handle_sign(sink, traits::test_negative(n)) &&
+                           base::inf<CharEncoding, Tag>(sink, n, false);
+                }
+
                 template <typename OutputIterator>
                 static bool integer_part(OutputIterator& sink,
                                          const double n,
                                          const bool sign,
                                          const bool)
                 {
-                    namespace karma = boost::spirit::karma;
+                    return handle_sign(sink, sign) &&
+                           base::integer_part(sink, n, sign, false);
+                }
 
-                    /* Karma doesn't do what we want for 0 values (doesn't print
-                     * '+'), and doesn't add spaces on positive values, so do
-                     * the sign and blank printing for karma. */
-                    constexpr const bool blank_on_positive =
-                        ir::get_field_value<
-                            Fields,
-                            ir::output::fields::extra_blank_on_positive>();
-                    constexpr const bool always_print_sign =
-                        ir::get_field_value<
-                            Fields,
-                            ir::output::fields::always_print_sign>();
-
-                    static_assert(!(blank_on_positive && always_print_sign),
-                                  "invalid ir");
-
-                    if (blank_on_positive && !sign)
-                    {
-                        if (!karma::char_inserter<>::call(sink, ' '))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (always_print_sign && !sign)
-                    {
-                        if (!karma::char_inserter<>::call(sink, '+'))
-                        {
-                            return false;
-                        }
-                    }
-
-                    return base::integer_part(sink, n, sign, false);
+                template <typename CharEncoding,
+                          typename Tag,
+                          typename OutputIterator>
+                static bool
+                nan(OutputIterator& sink, const double n, const bool)
+                {
+                    namespace traits = boost::spirit::traits;
+                    return handle_sign(sink, traits::test_negative(n)) &&
+                           base::nan<CharEncoding, Tag>(sink, n, false);
                 }
 
                 static unsigned precision(const double value)
