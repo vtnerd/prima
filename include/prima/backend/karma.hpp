@@ -463,8 +463,7 @@ namespace backend
                     int,
                     ir::get_field_value<Fields, fields::radix>(),
                     ir::get_field_value<Fields, fields::always_print_sign>()>;
-                return boost::proto::deep_copy(
-                    width::apply<Fields>(int_generator{}, ' '));
+                return width::apply<Fields>(int_generator{}, ' ');
             }
         };
 
