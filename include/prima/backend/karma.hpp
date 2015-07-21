@@ -80,22 +80,23 @@ namespace backend
         //
         struct width
         {
-            template <typename, typename, typename> struct impl;
+            template <typename, typename> struct impl;
 
-            template <typename Inner, typename Justification>
-            struct impl<Inner, meta::void_, Justification>
+            template <typename Justification>
+            struct impl<meta::void_, Justification>
             {
+                template <typename Inner>
                 static auto apply(const Inner& inner, const char)
                 {
                     return boost::proto::deep_copy(inner);
                 }
             };
 
-            template <typename Inner, unsigned Width>
-            struct impl<Inner,
-                        ir::output::values::width<Width>,
+            template <unsigned Width>
+            struct impl<ir::output::values::width<Width>,
                         ir::output::values::left_justified>
             {
+                template <typename Inner>
                 static auto apply(const Inner& inner, const char pad)
                 {
                     return boost::proto::deep_copy(
@@ -103,11 +104,11 @@ namespace backend
                 }
             };
 
-            template <typename Inner, unsigned Width>
-            struct impl<Inner,
-                        ir::output::values::width<Width>,
+            template <unsigned Width>
+            struct impl<ir::output::values::width<Width>,
                         ir::output::values::right_justified>
             {
+                template <typename Inner>
                 static auto apply(const Inner& inner, const char pad)
                 {
                     return boost::proto::deep_copy(
@@ -123,7 +124,7 @@ namespace backend
                     ir::get_field_t<Fields, fields::left_justified>;
                 using width = ir::get_field_t<Fields, fields::width>;
 
-                return impl<Inner, width, justification>::apply(inner, pad);
+                return impl<width, justification>::apply(inner, pad);
             }
         };
 
@@ -448,18 +449,22 @@ namespace backend
                                          fields::extra_blank_on_positive>(),
                     "' ' flag not yet supported for integers");
                 static_assert(
-                    !ir::get_field_value<Fields, fields::use_alternate_format>(),
-                    "'#' flag not yet supported for integers");
+                    !ir::get_field_value<Fields, fields::pad_with_zero>(),
+                    "'0' flag not yet supported for integers");
                 static_assert(
                     ir::get_field_value<Fields, fields::precision>() == 1,
                     "only a precision of 1 is currently supported "
                     "for integers");
+                static_assert(
+                    !ir::get_field_value<Fields, fields::use_alternate_format>(),
+                    "'#' flag not yet supported for integers");
 
                 using int_generator = boost::spirit::karma::int_generator<
                     int,
                     ir::get_field_value<Fields, fields::radix>(),
                     ir::get_field_value<Fields, fields::always_print_sign>()>;
-                return boost::proto::deep_copy(int_generator{});
+                return boost::proto::deep_copy(
+                    width::apply<Fields>(int_generator{}, ' '));
             }
         };
 

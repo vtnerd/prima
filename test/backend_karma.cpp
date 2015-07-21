@@ -2,9 +2,17 @@
 #include <utility>
 
 #include <boost/detail/lightweight_test.hpp>
+#include <boost/version.hpp>
 
 #include "prima/meta/base.hpp"
 #include "prima/sprintf.hpp"
+
+#define PRIMA_BOOST_MAJOR (BOOST_VERSION / 100000)
+#define PRIMA_BOOST_MINOR ((BOOST_VERSION / 100) % 1000)
+
+#if (PRIMA_BOOST_MAJOR > 1) || (PRIMA_BOOST_MAJOR == 1 && PRIMA_BOOST_MINOR >= 59)
+  #define PRIMA_NO_LEFT_ALIGN_BUG
+#endif
 
 namespace
 {
@@ -304,6 +312,10 @@ void int_tests()
     BOOST_TEST_EQ("100", generate_and_system_compare<PRIMA_FMT("%i")>(100));
     BOOST_TEST_EQ("-9223372036854775808", generate<PRIMA_FMT("%+i")>(std::numeric_limits<std::int64_t>::min()));
     BOOST_TEST_EQ("+9223372036854775807", generate<PRIMA_FMT("%+i")>(std::numeric_limits<std::int64_t>::max()));
+    BOOST_TEST_EQ("  1024", generate_and_system_compare<PRIMA_FMT("%6i")>(1024));
+    BOOST_TEST_EQ("1024  ", generate_and_system_compare<PRIMA_FMT("%-6i")>(1024));
+    BOOST_TEST_EQ(" -1024", generate_and_system_compare<PRIMA_FMT("%6i")>(-1024));
+    BOOST_TEST_EQ("-1024 ", generate_and_system_compare<PRIMA_FMT("%-6i")>(-1024));
 }
 
 void string_tests()
@@ -322,6 +334,8 @@ void unsigned_tests()
     BOOST_TEST_EQ("18446744073709551615", generate<PRIMA_FMT("%u")>(std::numeric_limits<std::uint64_t>::max()));
     BOOST_TEST_EQ("0100", generate_and_system_compare<PRIMA_FMT("%.4u")>(100u));
     BOOST_TEST_EQ(" 0100", generate_and_system_compare<PRIMA_FMT("%5.4u")>(100u));
+    BOOST_TEST_EQ("0100 ", generate_and_system_compare<PRIMA_FMT("%-5.4u")>(100u));
+    BOOST_TEST_EQ("00100", generate_and_system_compare<PRIMA_FMT("%05u")>(100u));
 
     // octal
     BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%o")>(0u));
@@ -329,6 +343,8 @@ void unsigned_tests()
     BOOST_TEST_EQ("1777777777777777777777", generate<PRIMA_FMT("%o")>(std::numeric_limits<std::uint64_t>::max()));
     BOOST_TEST_EQ("0144", generate_and_system_compare<PRIMA_FMT("%.4o")>(100u));
     BOOST_TEST_EQ(" 0144", generate_and_system_compare<PRIMA_FMT("%5.4o")>(100u));
+    BOOST_TEST_EQ("0144 ", generate_and_system_compare<PRIMA_FMT("%-5.4o")>(100u));
+    BOOST_TEST_EQ("00144", generate_and_system_compare<PRIMA_FMT("%05o")>(100u));
 
     // lower case hex
     BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%x")>(0u));
@@ -336,6 +352,8 @@ void unsigned_tests()
     BOOST_TEST_EQ("ffffffffffffffff", generate<PRIMA_FMT("%x")>(std::numeric_limits<std::uint64_t>::max()));
     BOOST_TEST_EQ("0064", generate_and_system_compare<PRIMA_FMT("%.4x")>(100u));
     BOOST_TEST_EQ(" 0064", generate_and_system_compare<PRIMA_FMT("%5.4x")>(100u));
+    BOOST_TEST_EQ("0064 ", generate_and_system_compare<PRIMA_FMT("%-5.4x")>(100u));
+    BOOST_TEST_EQ("00064", generate_and_system_compare<PRIMA_FMT("%05x")>(100u));
 
     // upper case hex
     BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%X")>(0u));
@@ -343,6 +361,10 @@ void unsigned_tests()
     BOOST_TEST_EQ("FFFFFFFFFFFFFFFF", generate<PRIMA_FMT("%X")>(std::numeric_limits<std::uint64_t>::max()));
     BOOST_TEST_EQ("0064", generate_and_system_compare<PRIMA_FMT("%.4X")>(100u));
     BOOST_TEST_EQ(" 0064", generate_and_system_compare<PRIMA_FMT("%5.4X")>(100u));
+#ifdef PRIMA_NO_LEFT_ALIGN_BUG
+    BOOST_TEST_EQ("0064 ", generate_and_system_compare<PRIMA_FMT("%-5.4X")>(100u));
+#endif
+    BOOST_TEST_EQ("00064", generate_and_system_compare<PRIMA_FMT("%05X")>(100u));
 }
 
 int main()
