@@ -292,10 +292,12 @@ void float_tests()
     BOOST_TEST_EQ("+5e-05", generate_and_system_compare<PRIMA_FMT("%+.6g")>(0.00005f));
     BOOST_TEST_EQ("100005", generate_and_system_compare<PRIMA_FMT("%g")>(100005.0f));
     BOOST_TEST_EQ("-100005", generate_and_system_compare<PRIMA_FMT("%g")>(-100005.0f));
-    BOOST_TEST_EQ("1.00001e+06", generate_and_system_compare<PRIMA_FMT("%g")>(1000005.0f));
-    BOOST_TEST_EQ("-1.00001e+06", generate_and_system_compare<PRIMA_FMT("%g")>(-1000005.0f));
-    BOOST_TEST_EQ("1.0001e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(100005.0f));
-    BOOST_TEST_EQ("-1.0001e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(-100005.0f));
+    BOOST_TEST_EQ("1.00001e+06", generate<PRIMA_FMT("%g")>(1000005.0f));
+    BOOST_TEST_EQ("-1.00001e+06", generate<PRIMA_FMT("%g")>(-1000005.0f));
+    BOOST_TEST_EQ("1.0001e+05", generate<PRIMA_FMT("%.5g")>(100005.0f));
+    BOOST_TEST_EQ("-1.0001e+05", generate<PRIMA_FMT("%.5g")>(-100005.0f));
+    BOOST_TEST_EQ("1e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(100004.0f));
+    BOOST_TEST_EQ("-1e+05", generate_and_system_compare<PRIMA_FMT("%.5g")>(-100004.0f));
     BOOST_TEST_EQ("nan", generate<PRIMA_FMT("%g")>(std::numeric_limits<float>::quiet_NaN()));
     BOOST_TEST_EQ("inf", generate<PRIMA_FMT("%g")>(std::numeric_limits<float>::infinity()));
     BOOST_TEST_EQ("+nan", generate<PRIMA_FMT("%+g")>(std::numeric_limits<float>::quiet_NaN()));

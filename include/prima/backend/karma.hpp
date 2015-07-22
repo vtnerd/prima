@@ -55,7 +55,6 @@ namespace backend
                 }
             };
 
-
             template <typename Inner>
             struct impl<Inner, ir::output::values::lower_case>
             {
