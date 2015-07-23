@@ -1,0 +1,10 @@
+import testing ;
+
+test-suite prima/tests/utilities :
+           [ run ir.cpp ]
+           [ run meta.cpp ]
+           ;
+
+test-suite prima/tests/backends :
+           [ run backend_karma.cpp ]
+           ;
