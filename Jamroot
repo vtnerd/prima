@@ -7,8 +7,10 @@ project prima : requirements
         <include>./include/
         <include>$(MPLLIBS_PATH)
         <include>$(BOOST_PATH)
-        <toolset>gcc:<cxxflags>-std=c++1y
         <toolset>clang:<cxxflags>-std=c++1y
+        <toolset>darwin:<cxxflags>-std=c++1y
+        <toolset>gcc:<cxxflags>-std=c++1y
         :
         :
         ;
+
