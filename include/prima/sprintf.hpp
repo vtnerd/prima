@@ -9,6 +9,20 @@
 
 namespace prima
 {
+//! template <typename Format,
+//!           typename Backend = backend::karma,
+//!           typename Iterator,
+//!           typename... Args>
+//! bool sprintf(Iterator&& out, Args&&... args)
+//!
+//! Outputs `Format` with `args` to `out` using `Backend`.
+//!
+//! \requires `Format` is a valid prima format string.
+//! \requires `Iterator` meets the requirements of the OutputIterator concept.
+//!
+//! \throws Iff `Backend::generate` throws.
+//!
+//! \return Result of `Backend::generate`.
 template <typename Format,
           typename Backend = backend::karma,
           typename Iterator,

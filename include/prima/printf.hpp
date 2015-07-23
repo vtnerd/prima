@@ -11,6 +11,18 @@
 
 namespace prima
 {
+//! template <typename Format,
+//!           typename Backend = backend::karma,
+//!           typename... Args>
+//! bool sprintf(Iterator&& out, Args&&... args)
+//!
+//! Outputs `Format` with `args` to `std::cout` using `Backend`.
+//!
+//! \requires `Format` is a valid prima format string.
+//!
+//! \throws Iff `Backend::generate` throws.
+//!
+//! \return Result of `Backend::generate`.
 template <typename Format, typename Backend = backend::karma, typename... Args>
 bool printf(Args&&... args)
 {
