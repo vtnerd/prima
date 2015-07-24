@@ -5,7 +5,10 @@
 
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/proto/deep_copy.hpp>
+#include <boost/spirit/include/karma_action.hpp>
+#include <boost/spirit/include/karma_alternative.hpp>
 #include <boost/spirit/include/karma_char.hpp>
+#include <boost/spirit/include/karma_eps.hpp>
 #include <boost/spirit/include/karma_generate.hpp>
 #include <boost/spirit/include/karma_int.hpp>
 #include <boost/spirit/include/karma_left_alignment.hpp>
@@ -26,6 +29,7 @@ namespace prima
 {
 namespace backend
 {
+
     //! karma
     //!
     //! Output generator that uses boost::spirit::karma.
@@ -36,6 +40,33 @@ namespace backend
          * overload selection, all such functions must be instantiated in their
          * entirety. This section uses class partial-template specialization to
          * limit the overload selection where possible. */
+
+        struct not_zero
+        {
+            void operator()(const unsigned long long attribute,
+                            boost::spirit::unused_type,
+                            bool& do_output) const
+            {
+                do_output = (attribute != 0);
+            }
+
+            template <typename Attribute>
+            void operator()(const boost::optional<Attribute>& attribute,
+                            boost::spirit::unused_type,
+                            bool& do_output) const
+            {
+                if (attribute)
+                {
+                    (*this)(*attribute,
+                            boost::spirit::unused_type{},
+                            do_output);
+                }
+                else
+                {
+                    do_output = false;
+                }
+            }
+        };
 
         ////////////////////////////////////////////////////////////////////////
         // Generic Output Functions                                           //
@@ -472,10 +503,20 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::unsigned_<Fields>>
         {
-            template <typename, typename> struct add_precision;
+            template <typename, typename> struct precision;
 
             template <typename Ignored>
-            struct add_precision<ir::output::values::precision<1>, Ignored>
+            struct precision<ir::output::values::precision<0>, Ignored>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy((inner[not_zero{}]) |
+                                                   boost::spirit::karma::eps);
+                }
+            };
+
+            template <typename Ignored>
+            struct precision<ir::output::values::precision<1>, Ignored>
             {
                 template <typename Inner>
                 static const Inner& apply(const Inner& inner)
@@ -485,8 +526,7 @@ namespace backend
             };
 
             template <unsigned Precision, typename Ignored>
-            struct add_precision<ir::output::values::precision<Precision>,
-                                 Ignored>
+            struct precision<ir::output::values::precision<Precision>, Ignored>
             {
                 template <typename Inner> static auto apply(const Inner& inner)
                 {
@@ -496,30 +536,72 @@ namespace backend
                 }
             };
 
+            template <typename, unsigned, typename> struct alternate
+            {
+                template <typename Inner>
+                static const Inner& apply(const Inner& inner)
+                {
+                    return inner;
+                }
+            };
+
+            template <typename Ignored>
+            struct alternate<ir::output::values::use_alternate_format, 8, Ignored>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        (("0" << inner)[not_zero{}]) | "0");
+                }
+            };
+
+            template <typename Ignored>
+            struct alternate<ir::output::values::use_alternate_format,
+                             16,
+                             Ignored>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        (("0x" << inner)[not_zero{}]) | inner);
+                }
+            };
+
             static auto apply()
             {
                 namespace fields = ir::output::fields;
-                using precision = ir::get_field_t<Fields, fields::precision>;
-
                 static_assert(meta::length_t<Fields>::value == 7,
                               "invalid fields");
-                static_assert(precision::value != 0,
-                              "precision of 0 is not currently allowed for "
-                              "unsigned integers");
-                static_assert(
-                    !ir::get_field_value<Fields, fields::use_alternate_format>(),
-                    "'#' flag not yet supported for unsigned integers");
 
-                constexpr const char pad =
-                    ir::get_field_value<Fields, fields::pad_with_zero>() ? '0' :
-                                                                           ' ';
+                using alternate_field =
+                    ir::get_field_t<Fields, fields::use_alternate_format>;
                 constexpr const unsigned radix =
                     ir::get_field_value<Fields, fields::radix>();
 
+                static_assert(
+                    !alternate_field::value || radix == 8 || radix == 16,
+                    "alternate format can only be used with radix 8 or 16");
+
+                constexpr const unsigned precision_req =
+                    ir::get_field_value<Fields, fields::precision>();
+                constexpr const unsigned precision_actual =
+                    radix == 8 && alternate_field::value && precision_req ?
+                        precision_req - 1 :
+                        precision_req;
+
+                using precision_field =
+                    ir::output::values::precision<precision_actual>;
+                constexpr const char pad =
+                    ir::get_field_value<Fields, fields::pad_with_zero>() ? '0' :
+                                                                           ' ';
+
                 using uint_generator =
-                    boost::spirit::karma::uint_generator<unsigned, radix>;
+                    boost::spirit::karma::uint_generator<unsigned long long,
+                                                         radix>;
                 return upper_case::apply<Fields>(width::apply<Fields>(
-                    add_precision<precision, bool>::apply(uint_generator{}),
+                    alternate<alternate_field, radix, bool>::apply(
+                        precision<precision_field, bool>::apply(
+                            uint_generator{})),
                     pad));
             }
         };

@@ -338,6 +338,9 @@ void unsigned_tests()
     BOOST_TEST_EQ(" 0100", generate_and_system_compare<PRIMA_FMT("%5.4u")>(100u));
     BOOST_TEST_EQ("0100 ", generate_and_system_compare<PRIMA_FMT("%-5.4u")>(100u));
     BOOST_TEST_EQ("00100", generate_and_system_compare<PRIMA_FMT("%05u")>(100u));
+    BOOST_TEST_EQ("100`", generate_and_system_compare<PRIMA_FMT("%.0u`")>(100));
+    BOOST_TEST_EQ("18446744073709551615`", generate<PRIMA_FMT("%.0u`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("`", generate_and_system_compare<PRIMA_FMT("%.0u`")>(0u));
 
     // octal
     BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%o")>(0u));
@@ -347,6 +350,17 @@ void unsigned_tests()
     BOOST_TEST_EQ(" 0144", generate_and_system_compare<PRIMA_FMT("%5.4o")>(100u));
     BOOST_TEST_EQ("0144 ", generate_and_system_compare<PRIMA_FMT("%-5.4o")>(100u));
     BOOST_TEST_EQ("00144", generate_and_system_compare<PRIMA_FMT("%05o")>(100u));
+    BOOST_TEST_EQ("144`", generate_and_system_compare<PRIMA_FMT("%.0o`")>(100));
+    BOOST_TEST_EQ("1777777777777777777777`", generate<PRIMA_FMT("%.0o`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("`", generate_and_system_compare<PRIMA_FMT("%.0o`")>(0u));
+    BOOST_TEST_EQ("0144`", generate_and_system_compare<PRIMA_FMT("%#o`")>(100));
+    BOOST_TEST_EQ("01777777777777777777777`", generate<PRIMA_FMT("%#o`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("0`", generate_and_system_compare<PRIMA_FMT("%#o`")>(0u));
+    BOOST_TEST_EQ("0144`", generate_and_system_compare<PRIMA_FMT("%#.0o`")>(100));
+    BOOST_TEST_EQ("01777777777777777777777`", generate<PRIMA_FMT("%#.0o`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("0`", generate_and_system_compare<PRIMA_FMT("%#.0o`")>(0u));
+    BOOST_TEST_EQ(" 0144`", generate_and_system_compare<PRIMA_FMT("%#5.4o`")>(100u));
+    BOOST_TEST_EQ("00144`", generate_and_system_compare<PRIMA_FMT("%#.5o`")>(100u));
 
     // lower case hex
     BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%x")>(0u));
@@ -356,6 +370,17 @@ void unsigned_tests()
     BOOST_TEST_EQ(" 0064", generate_and_system_compare<PRIMA_FMT("%5.4x")>(100u));
     BOOST_TEST_EQ("0064 ", generate_and_system_compare<PRIMA_FMT("%-5.4x")>(100u));
     BOOST_TEST_EQ("00064", generate_and_system_compare<PRIMA_FMT("%05x")>(100u));
+    BOOST_TEST_EQ("64`", generate_and_system_compare<PRIMA_FMT("%.0x`")>(100));
+    BOOST_TEST_EQ("ffffffffffffffff`", generate<PRIMA_FMT("%.0x`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("`", generate_and_system_compare<PRIMA_FMT("%.0x`")>(0u));
+    BOOST_TEST_EQ("0x64`", generate_and_system_compare<PRIMA_FMT("%#x`")>(100));
+    BOOST_TEST_EQ("0xffffffffffffffff`", generate<PRIMA_FMT("%#x`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("0`", generate_and_system_compare<PRIMA_FMT("%#x`")>(0u));
+    BOOST_TEST_EQ("0x64`", generate_and_system_compare<PRIMA_FMT("%#.0x`")>(100));
+    BOOST_TEST_EQ("0xffffffffffffffff`", generate<PRIMA_FMT("%#.0x`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("`", generate_and_system_compare<PRIMA_FMT("%#.0x`")>(0u));
+    BOOST_TEST_EQ("0x0064`", generate_and_system_compare<PRIMA_FMT("%#6.4x`")>(100u));
+    BOOST_TEST_EQ("  0000`", generate_and_system_compare<PRIMA_FMT("%#6.4x`")>(0u));
 
     // upper case hex
     BOOST_TEST_EQ("0", generate_and_system_compare<PRIMA_FMT("%X")>(0u));
@@ -367,6 +392,17 @@ void unsigned_tests()
     BOOST_TEST_EQ("0064 ", generate_and_system_compare<PRIMA_FMT("%-5.4X")>(100u));
 #endif
     BOOST_TEST_EQ("00064", generate_and_system_compare<PRIMA_FMT("%05X")>(100u));
+    BOOST_TEST_EQ("64`", generate_and_system_compare<PRIMA_FMT("%.0X`")>(100));
+    BOOST_TEST_EQ("FFFFFFFFFFFFFFFF`", generate<PRIMA_FMT("%.0X`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("`", generate_and_system_compare<PRIMA_FMT("%.0X`")>(0u));
+    BOOST_TEST_EQ("0X64`", generate_and_system_compare<PRIMA_FMT("%#X`")>(100));
+    BOOST_TEST_EQ("0XFFFFFFFFFFFFFFFF`", generate<PRIMA_FMT("%#X`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("0`", generate_and_system_compare<PRIMA_FMT("%#X`")>(0u));
+    BOOST_TEST_EQ("0X64`", generate_and_system_compare<PRIMA_FMT("%#.0X`")>(100));
+    BOOST_TEST_EQ("0XFFFFFFFFFFFFFFFF`", generate<PRIMA_FMT("%#.0X`")>(std::numeric_limits<std::uint64_t>::max()));
+    BOOST_TEST_EQ("`", generate_and_system_compare<PRIMA_FMT("%#.0X`")>(0u));
+    BOOST_TEST_EQ("0X0064`", generate_and_system_compare<PRIMA_FMT("%#6.4X`")>(100u));
+    BOOST_TEST_EQ("  0000`", generate_and_system_compare<PRIMA_FMT("%#6.4X`")>(0u));
 }
 
 int main()
