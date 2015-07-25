@@ -6,5 +6,9 @@ test-suite prima/tests/utilities :
            ;
 
 test-suite prima/tests/backends :
-           [ run backend_karma.cpp ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=float : karma_float ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=int : karma_int ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=mixed : karma_mixed ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=string : karma_string ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=unsigned : karma_unsigned ]
            ;

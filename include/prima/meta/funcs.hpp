@@ -9,6 +9,10 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/push_back.hpp>
 #include <boost/mpl/size.hpp>
+#include <boost/type_traits/decay.hpp>
+#include <boost/type_traits/is_const.hpp>
+#include <boost/type_traits/is_rvalue_reference.hpp>
+#include <boost/type_traits/remove_const.hpp>
 
 #include "prima/meta/base.hpp"
 
@@ -28,6 +32,9 @@ namespace meta
     template <typename F, typename... A>
     using bind = typename F::template apply<A...>;
 
+    template<typename T>
+    using decay_t = typename boost::decay<T>::type;
+
     template <typename Condition, typename IfTrue, typename IfFalse>
     using eval_if_t =
         typename boost::mpl::eval_if<Condition, IfTrue, IfFalse>::type;
@@ -45,6 +52,12 @@ namespace meta
 
     template <typename F, typename... A>
     using invoke = typename F::template apply<A...>::type;
+
+    template<typename T>
+    using is_const = boost::is_const<T>;
+
+    template<typename T>
+    using is_rvalue_reference = boost::is_rvalue_reference<T>;
 
     template <typename Condition>
     using is_void = boost::mpl::is_void_<Condition>;
@@ -102,6 +115,9 @@ namespace meta
             using type = typename boost::mpl::push_back<Sequence, Value>::type;
         };
     };
+
+    template<typename T>
+    using remove_const_t = typename boost::remove_const<T>::type;
 } // meta
 } // prima
 
