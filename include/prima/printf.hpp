@@ -2,12 +2,11 @@
 #define PRIMA_PRINTF_HPP
 
 #include <iostream>
-#include <iterator>
 #include <utility>
 
 #include "prima/backend/karma.hpp"
 #include "prima/base.hpp"
-#include "prima/sprintf.hpp"
+#include "prima/fprintf.hpp"
 
 namespace prima
 {
@@ -20,14 +19,14 @@ namespace prima
 //!
 //! \requires `Format` is a valid prima format string.
 //!
-//! \throws Iff `Backend::generate` throws.
+//! \throws Unspecified if `Backend::generate` throws.
+//! \throws Unspecified if `std::cout` is configured to throw on errors.
 //!
-//! \return Result of `Backend::generate`.
+//! \returns `std::cout.good()`.
 template <typename Format, typename Backend = backend::karma, typename... Args>
 bool printf(Args&&... args)
 {
-    return sprintf<Format, Backend>(std::ostream_iterator<char>(std::cout),
-                                    std::forward<Args>(args)...);
+    return fprintf<Format, Backend>(std::cout, std::forward<Args>(args)...);
 }
 } // prima
 
