@@ -1,6 +1,7 @@
 #ifndef PRIMA_BACKEND_KARMA_HPP
 #define PRIMA_BACKEND_KARMA_HPP
 
+#include <cstdint>
 #include <limits>
 
 #include <boost/fusion/adapted/std_tuple.hpp>
@@ -29,7 +30,6 @@ namespace prima
 {
 namespace backend
 {
-
     //! karma
     //!
     //! Output generator that uses boost::spirit::karma.
@@ -41,13 +41,42 @@ namespace backend
          * entirety. This section uses class partial-template specialization to
          * limit the overload selection where possible. */
 
-        struct not_zero
+        struct not_negative
         {
-            void operator()(const unsigned long long attribute,
+            template <typename Attribute>
+            void operator()(const Attribute attribute,
                             boost::spirit::unused_type,
                             bool& do_output) const
             {
-                do_output = (attribute != 0);
+                do_output = !boost::spirit::traits::test_negative(attribute);
+            }
+
+            template <typename Attribute>
+            void operator()(const boost::optional<Attribute>& attribute,
+                            boost::spirit::unused_type,
+                            bool& do_output) const
+            {
+                if (attribute)
+                {
+                    (*this)(*attribute,
+                            boost::spirit::unused_type{},
+                            do_output);
+                }
+                else
+                {
+                    do_output = false;
+                }
+            }
+        };
+
+        struct not_zero
+        {
+            template <typename Attribute>
+            void operator()(const Attribute& attribute,
+                            boost::spirit::unused_type,
+                            bool& do_output) const
+            {
+                do_output = !boost::spirit::traits::test_zero(attribute);
             }
 
             template <typename Attribute>
@@ -469,6 +498,26 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::int_<Fields>>
         {
+            template <typename, typename> struct spacer
+            {
+                template <typename Inner>
+                static const Inner& apply(const Inner& inner)
+                {
+                    return inner;
+                }
+            };
+
+            template <char Spacer>
+            struct spacer<meta::true_, meta::char_<Spacer>>
+            {
+                template <typename Inner>
+                static const auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        ((Spacer << inner)[not_negative{}]) | inner);
+                }
+            };
+
             static auto apply()
             {
                 namespace fields = ir::output::fields;
@@ -476,26 +525,34 @@ namespace backend
                 static_assert(meta::length_t<Fields>::value == 9,
                               "invalid fields");
                 static_assert(
-                    !ir::get_field_value<Fields,
-                                         fields::extra_blank_on_positive>(),
-                    "' ' flag not yet supported for integers");
-                static_assert(
-                    !ir::get_field_value<Fields, fields::pad_with_zero>(),
-                    "'0' flag not yet supported for integers");
-                static_assert(
                     ir::get_field_value<Fields, fields::precision>() == 1,
                     "only a precision of 1 is currently supported "
                     "for integers");
+
                 static_assert(
                     !ir::get_field_value<Fields, fields::use_alternate_format>(),
-                    "'#' flag not yet supported for integers");
+                    "'#' flag has no effect on integers");
+
+                constexpr const bool space_flag =
+                    ir::get_field_value<Fields,
+                                        fields::extra_blank_on_positive>();
+                constexpr const bool sign_flag =
+                    ir::get_field_value<Fields, fields::always_print_sign>();
+
+                static_assert(!(sign_flag && space_flag),
+                              "'0' and ' ' flags cannot be set at the same "
+                              "time");
 
                 using int_generator = boost::spirit::karma::int_generator<
-                    int,
+                    std::intmax_t,
                     ir::get_field_value<Fields, fields::radix>(),
-                    ir::get_field_value<Fields, fields::always_print_sign>()>;
-                return boost::proto::deep_copy(
-                    width::apply<Fields>(int_generator{}, ' '));
+                    false>;
+                using add_spacer = meta::bool_<space_flag || sign_flag>;
+                using spacer_char = meta::char_ < space_flag ? ' ' : '+' > ;
+
+                return boost::proto::deep_copy(width::apply<Fields>(
+                    spacer<add_spacer, spacer_char>::apply(int_generator{}),
+                    ' '));
             }
         };
 
@@ -537,6 +594,7 @@ namespace backend
                                                           '0')[inner]);
                 }
             };
+
 
             template <typename, unsigned, typename> struct alternate
             {
@@ -676,6 +734,10 @@ namespace backend
         };
 
     public:
+        /* Theres some issues with zero and one sized tuples. Zero sized tuples
+         * don't work with string literals. One sized tuples don't work with
+         * alternative generators. */
+
         //! template <typename IR, typename Iterator>
         //! static bool generate(Iterator&& iterator)
         //!
@@ -695,15 +757,34 @@ namespace backend
                 std::forward<Iterator>(iterator), generate_tree<IR>::apply());
         }
 
-        /* Forwarding with Karma doesn't work with a single entry. If the
-           single entry is a mutable reference (l-value or r-value) it tries to
-           create a reference from a const-reference. Theres no need for
-           mutable references until %n is supported, which will be tricky
-           with karma anyway. */
+        //! template <typename IR,
+        //!           typename Iterator,
+        //!           typename Arg>
+        //! static bool generate(
+        //!     Iterator&& iterator, const Arg1& arg, const Args&... args)
+        //!
+        //! Outputs the dynamic expression `IR` to `iterator`.
+        //!
+        //! \requires `IR` is output from frontend::sprintf_parser_func.
+        //! \requires `Iterator` meets the requirements of the OutputIterator
+        //!  concept.
+        //!
+        //! \throws Iff `boost::spirit::karma::generate` throws
+        //!
+        //! \return Result of `boost::spirit::karma::generate`.
+        template <typename IR, typename Iterator, typename Arg>
+        static bool generate(Iterator&& iterator, const Arg& arg)
+        {
+            return boost::spirit::karma::generate(std::forward<Iterator>(
+                                                      iterator),
+                                                  generate_tree<IR>::apply(),
+                                                  arg);
+        }
 
         //! template <typename IR,
         //!           typename Iterator,
-        //!           typename Arg,
+        //!           typename Arg1,
+        //!           typename Arg2,
         //!           typename... Args>
         //! static bool generate(
         //!     Iterator&& iterator, const Arg1& arg, const Args&... args)
@@ -717,14 +798,20 @@ namespace backend
         //! \throws Iff `boost::spirit::karma::generate` throws
         //!
         //! \return Result of `boost::spirit::karma::generate`.
-        template <typename IR, typename Iterator, typename Arg1, typename... Args>
-        static bool
-        generate(Iterator&& iterator, const Arg1& arg1, const Args&... args)
+        template <typename IR,
+                  typename Iterator,
+                  typename Arg1,
+                  typename Arg2,
+                  typename... Args>
+        static bool generate(Iterator&& iterator,
+                             const Arg1& arg1,
+                             const Arg2& arg2,
+                             const Args&... args)
         {
             return boost::spirit::karma::generate(
                 std::forward<Iterator>(iterator),
                 generate_tree<IR>::apply(),
-                std::tie<const Arg1&, const Args&...>(arg1, args...));
+                std::tie(arg1, arg2, args...));
         }
     };
 } // convert
