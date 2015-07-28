@@ -89,14 +89,14 @@ namespace backend
             template <typename Inner>
             struct impl<Inner, ir::output::values::lower_case>
             {
-                static auto apply(const Inner& inner)
+                static const Inner& apply(const Inner& inner)
                 {
-                    return boost::proto::deep_copy(inner);
+                    return inner;
                 }
             };
 
             template <typename Fields, typename Inner>
-            static auto apply(const Inner& inner)
+            static decltype(auto) apply(const Inner& inner)
             {
                 return impl<
                     Inner,
@@ -116,9 +116,9 @@ namespace backend
             struct impl<meta::void_, Justification>
             {
                 template <typename Inner>
-                static auto apply(const Inner& inner, const char)
+                static const Inner& apply(const Inner& inner, const char)
                 {
-                    return boost::proto::deep_copy(inner);
+                    return inner;
                 }
             };
 
@@ -147,7 +147,7 @@ namespace backend
             };
 
             template <typename Fields, typename Inner>
-            static auto apply(const Inner& inner, const char pad)
+            static decltype(auto) apply(const Inner& inner, const char pad)
             {
                 namespace fields = ir::output::fields;
                 using justification =
@@ -458,7 +458,8 @@ namespace backend
 
                 using float_generator =
                     boost::spirit::karma::real_generator<double, real_policy>;
-                return upper_case::apply<Fields>(float_generator{});
+                return boost::proto::deep_copy(
+                    upper_case::apply<Fields>(float_generator{}));
             }
         };
 
@@ -493,7 +494,8 @@ namespace backend
                     int,
                     ir::get_field_value<Fields, fields::radix>(),
                     ir::get_field_value<Fields, fields::always_print_sign>()>;
-                return width::apply<Fields>(int_generator{}, ' ');
+                return boost::proto::deep_copy(
+                    width::apply<Fields>(int_generator{}, ' '));
             }
         };
 
@@ -598,11 +600,12 @@ namespace backend
                 using uint_generator =
                     boost::spirit::karma::uint_generator<unsigned long long,
                                                          radix>;
-                return upper_case::apply<Fields>(width::apply<Fields>(
-                    alternate<alternate_field, radix, bool>::apply(
-                        precision<precision_field, bool>::apply(
-                            uint_generator{})),
-                    pad));
+                return boost::proto::deep_copy(
+                    upper_case::apply<Fields>(width::apply<Fields>(
+                        alternate<alternate_field, radix, bool>::apply(
+                            precision<precision_field, bool>::apply(
+                                uint_generator{})),
+                        pad)));
             }
         };
 
@@ -651,10 +654,10 @@ namespace backend
                 static_assert(meta::length_t<Fields>::value == 4,
                               "invalid fields");
 
-                return width::apply<Fields>(
+                return boost::proto::deep_copy(width::apply<Fields>(
                     add_precision<ir::get_field_t<Fields, fields::precision>>::
                         apply(boost::spirit::karma::string),
-                    ' ');
+                    ' '));
             }
         };
 
