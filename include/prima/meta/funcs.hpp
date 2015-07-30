@@ -32,8 +32,7 @@ namespace meta
     template <typename F, typename... A>
     using bind = typename F::template apply<A...>;
 
-    template<typename T>
-    using decay_t = typename boost::decay<T>::type;
+    template <typename T> using decay_t = typename boost::decay<T>::type;
 
     template <typename Condition, typename IfTrue, typename IfFalse>
     using eval_if_t =
@@ -53,10 +52,9 @@ namespace meta
     template <typename F, typename... A>
     using invoke = typename F::template apply<A...>::type;
 
-    template<typename T>
-    using is_const = boost::is_const<T>;
+    template <typename T> using is_const = boost::is_const<T>;
 
-    template<typename T>
+    template <typename T>
     using is_rvalue_reference = boost::is_rvalue_reference<T>;
 
     template <typename Condition>
@@ -82,9 +80,8 @@ namespace meta
 
         template <unsigned... Sequence, unsigned Head>
         struct apply<index_sequence<Sequence...>, Head>
+            : apply<index_sequence<Head - 1, Sequence...>, Head - 1>
         {
-            using type = typename apply<index_sequence<Head - 1, Sequence...>,
-                                        Head - 1>::type;
         };
     };
 
@@ -110,13 +107,13 @@ namespace meta
 
     struct push_back_func
     {
-        template <typename Sequence, typename Value> struct apply
+        template <typename Sequence, typename Value>
+        struct apply : boost::mpl::push_back<Sequence, Value>
         {
-            using type = typename boost::mpl::push_back<Sequence, Value>::type;
         };
     };
 
-    template<typename T>
+    template <typename T>
     using remove_const_t = typename boost::remove_const<T>::type;
 } // meta
 } // prima
