@@ -12,9 +12,9 @@ test-suite prima/tests/utilities :
            ;
 
 test-suite prima/tests/backends :
-           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=float : prima/tests/backends/karma_float ]
-           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=int : prima/tests/backends/karma_int ]
-           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=mixed : prima/tests/backends/karma_mixed ]
-           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=string : prima/tests/backends/karma_string ]
-           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=unsigned : prima/tests/backends/karma_unsigned ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=float : prima/tests/backend/karma_float ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=int : prima/tests/backend/karma_int ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=mixed : prima/tests/backend/karma_mixed ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=string : prima/tests/backend/karma_string ]
+           [ run backend/karma.cpp : : : <define>PRIMA_TEST_BENCH=unsigned : prima/tests/backend/karma_unsigned ]
            ;

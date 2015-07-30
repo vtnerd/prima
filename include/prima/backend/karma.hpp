@@ -9,11 +9,13 @@
 #include <boost/spirit/include/karma_action.hpp>
 #include <boost/spirit/include/karma_alternative.hpp>
 #include <boost/spirit/include/karma_char.hpp>
+#include <boost/spirit/include/karma_duplicate.hpp>
 #include <boost/spirit/include/karma_eps.hpp>
 #include <boost/spirit/include/karma_generate.hpp>
 #include <boost/spirit/include/karma_int.hpp>
 #include <boost/spirit/include/karma_left_alignment.hpp>
 #include <boost/spirit/include/karma_maxwidth.hpp>
+#include <boost/spirit/include/karma_omit.hpp>
 #include <boost/spirit/include/karma_real.hpp>
 #include <boost/spirit/include/karma_right_alignment.hpp>
 #include <boost/spirit/include/karma_sequence.hpp>
@@ -41,10 +43,34 @@ namespace backend
          * entirety. This section uses class partial-template specialization to
          * limit the overload selection where possible. */
 
+        template <typename Radix> struct absolute_value_1
+        {
+            template <typename Attribute>
+            void operator()(Attribute& attribute,
+                            boost::spirit::unused_type,
+                            boost::spirit::unused_type) const
+            {
+                attribute = boost::spirit::traits::get_absolute_value(
+                    attribute / Radix::value);
+            }
+        };
+
+        template <typename Radix> struct absolute_value_2
+        {
+            template <typename Attribute>
+            void operator()(Attribute& attribute,
+                            boost::spirit::unused_type,
+                            boost::spirit::unused_type) const
+            {
+                attribute = boost::spirit::traits::get_absolute_value(
+                    attribute % Radix::value);
+            }
+        };
+
         struct not_negative
         {
             template <typename Attribute>
-            void operator()(const Attribute attribute,
+            void operator()(const Attribute& attribute,
                             boost::spirit::unused_type,
                             bool& do_output) const
             {
@@ -498,6 +524,44 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::int_<Fields>>
         {
+            template <typename, typename> struct precision;
+
+            template <typename Ignored>
+            struct precision<ir::output::values::precision<0>, Ignored>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy((inner[not_zero{}]) |
+                                                   boost::spirit::karma::eps);
+                }
+            };
+
+            template <typename Ignored>
+            struct precision<ir::output::values::precision<1>, Ignored>
+            {
+                template <typename Inner>
+                static const Inner& apply(const Inner& inner)
+                {
+                    return inner;
+                }
+            };
+
+            template <unsigned Precision, typename Radix>
+            struct precision<ir::output::values::precision<Precision>, Radix>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    namespace karma = boost::spirit::karma;
+                    return boost::proto::deep_copy(
+                        karma::duplicate
+                            [((karma::skip[inner][not_negative{}]) | '-')
+                             << karma::right_align(Precision, '0')
+                                 [karma::duplicate
+                                      [inner[absolute_value_1<Radix>{}]
+                                       << inner[absolute_value_2<Radix>{}]]]]);
+                }
+            };
+
             template <typename, typename> struct spacer
             {
                 template <typename Inner>
@@ -525,11 +589,6 @@ namespace backend
                 static_assert(meta::length_t<Fields>::value == 9,
                               "invalid fields");
                 static_assert(
-                    ir::get_field_value<Fields, fields::precision>() == 1,
-                    "only a precision of 1 is currently supported "
-                    "for integers");
-
-                static_assert(
                     !ir::get_field_value<Fields, fields::use_alternate_format>(),
                     "'#' flag has no effect on integers");
 
@@ -543,15 +602,20 @@ namespace backend
                               "'0' and ' ' flags cannot be set at the same "
                               "time");
 
-                using int_generator = boost::spirit::karma::int_generator<
-                    std::intmax_t,
-                    ir::get_field_value<Fields, fields::radix>(),
-                    false>;
+                using radix = ir::get_field_t<Fields, fields::radix>;
+                using int_generator =
+                    boost::spirit::karma::int_generator<std::intmax_t,
+                                                        radix::value,
+                                                        false>;
                 using add_spacer = meta::bool_<space_flag || sign_flag>;
+                using precision_field =
+                    ir::get_field_t<Fields, fields::precision>;
                 using spacer_char = meta::char_ < space_flag ? ' ' : '+' > ;
 
                 return boost::proto::deep_copy(width::apply<Fields>(
-                    spacer<add_spacer, spacer_char>::apply(int_generator{}),
+                    spacer<add_spacer, spacer_char>::apply(
+                        precision<precision_field, radix>::apply(
+                            int_generator{})),
                     ' '));
             }
         };
@@ -594,7 +658,6 @@ namespace backend
                                                           '0')[inner]);
                 }
             };
-
 
             template <typename, unsigned, typename> struct alternate
             {
