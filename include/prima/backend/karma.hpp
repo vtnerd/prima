@@ -599,7 +599,7 @@ namespace backend
                     ir::get_field_value<Fields, fields::always_print_sign>();
 
                 static_assert(!(sign_flag && space_flag),
-                              "'0' and ' ' flags cannot be set at the same "
+                              "'+' and ' ' flags cannot be set at the same "
                               "time");
 
                 using radix = ir::get_field_t<Fields, fields::radix>;
