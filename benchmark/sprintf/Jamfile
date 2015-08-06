@@ -1,0 +1,3 @@
+
+exe prima/benchmarks/sprintf/simple_float : simple_float.cpp ;
+

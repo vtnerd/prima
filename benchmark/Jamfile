@@ -1,0 +1,6 @@
+project prima/benchmarks : requirements
+        <include>.
+        <link>static
+        :
+        :
+        ;
