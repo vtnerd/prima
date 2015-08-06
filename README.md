@@ -26,42 +26,56 @@ e, E, f, F, g, G |                               float, and double              
       
 ## Usage ##
 The prima I/O functions require a variadic compile-time string as input. A macro `PRIMA_FMT` can convert a string literal to the compile-time string in a C++11 compatible compiler. The user-literal `prima::literals::_fmt` can be used in compilers that support [literal operator templates for strings](http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html):
+
 ```c++
-using prima::literals;
-prima::printf<"hello %s"_fmt>("world");
+{
+    prima::printf<PRIMA_FMT("hello %s")>("world");
+}
+{
+    using prima::literals;
+    prima::printf<"hello %s"_fmt>("world");
+}
 ```
+The user string literal `_fmt` is the preferred method, because it will have more efficient _compile_-times.
 
 #### Output ####
 ##### printf #####
 Behaves just like `std::printf`:
+
 ```c++
 prima::printf<PRIMA_FMT("hello %s")>("world");
 ```
 
 ##### sprintf #####
-`prima::sprintf` differs slightly from `std::sprintf`; the first argument is templated and must meet [output iterator](http://en.cppreference.com/w/cpp/concept/OutputIterator) requirements. Since `char*` is a valid output iterator, `prima::sprintf` can be used in place of std::sprintf or other scenarios:
+`prima::sprintf` differs slightly from `std::sprintf`; the first argument is templated and must meet [output iterator](http://en.cppreference.com/w/cpp/concept/OutputIterator) requirements, and the output is _never_ null-terminated. Since `char*` is a valid output iterator, `prima::sprintf` can be used in place of std::sprintf or other scenarios:
+
 ```c++
 {
     char buffer[100] = {0};
+    // Never checks for buffer size. Does not null-terminate.
     prima::sprintf<PRIMA_FMT("hello %s")>(std::begin(buffer), "world");
 }
 {
     std::string buffer{};
+    // Throws if std::bad_alloc. Implicitly null-terminated due to std::string.
     prima::sprintf<PRIMA_FMT("hello %s")>(std::back_inserter(buffer), "world");
 }
 ```
 `prima::sprintf` will also update the output iterator to one-past the last write location, iff the argument is passed as a mutable l-value.
 
 ##### snprintf #####
-`prima::snprintf` differs slightly from `std::snprintf`; the first argument is templated and must meet [output iterator](http://en.cppreference.com/w/cpp/concept/OutputIterator) requirements. Since `char*` is a valid output iterator, `prima::sprintf` can be used in place of std::sprintf or other scenarios:
+`prima::snprintf` differs slightly from `std::snprintf`; the first argument is templated and must meet [output iterator](http://en.cppreference.com/w/cpp/concept/OutputIterator) requirements, and the function does not stop until `size` bytes have been output. Since `char*` is a valid output iterator, `prima::sprintf` can be used in place of std::sprintf or other scenarios:
+
 ```c++
 {
     char buffer[100] = {0};
+    // Does not null-terminate. Stops after sizeof(buffer) bytes (not sizeof(buffer) - 1).
     prima::snprintf<PRIMA_FMT("hello %s")>(std::begin(buffer), sizeof(buffer), "world");
 }
 {
     std::string buffer{};
     buffer.resize(100);
+    // Implicitly null-terminated due to std::string. Stops after buffer.size() bytes.
     prima::snprintf<PRIMA_FMT("hello %s")>(&buffer[0], buffer.size(), "world");
 }
 ```
