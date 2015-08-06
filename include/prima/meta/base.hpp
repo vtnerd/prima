@@ -8,6 +8,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/void.hpp>
 
+#include "prima/base.hpp" // include before metaparse/string.hpp
 #include <mpllibs/metaparse/string.hpp>
 
 namespace prima
