@@ -1,6 +1,7 @@
 import testing ;
 
 project prima/tests : requirements
+        <include>..
         <link>static
         :
         :

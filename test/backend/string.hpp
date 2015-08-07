@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/detail/lightweight_test.hpp>
 
-#include "../generate.hpp"
+#include "test/generate.hpp"
 #include "prima/backend/karma.hpp"
 #include "prima/meta/base.hpp"
 
