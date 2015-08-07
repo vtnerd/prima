@@ -1,5 +1,5 @@
 project prima/benchmarks : requirements
-        <include>.
+        <include>..
         <link>static
         :
         :

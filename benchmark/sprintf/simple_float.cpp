@@ -1,153 +1,136 @@
-#include <algorithm>
 #include <cstdio>
-#include <limits>
-#include <iostream>
+#include <iterator>
+#include <tuple>
+
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/range/algorithm/copy.hpp>
 
 #define PRIMA_LIMIT_FMT_SIZE 200
 
-#include "measure.hpp"
+#include "benchmark/run.hpp"
+#include "benchmark/scenario.hpp"
+#include "benchmark/sprintf/implementation_base.hpp"
 #include "prima/printf.hpp"
 #include "prima/sprintf.hpp"
 
 namespace
 {
+//
+// Benchmark Configuration
+//
+constexpr const unsigned long trials = 1000000;
+constexpr const std::array<float, 4> inputs{{-100.0, 0.0, 100.0, 1234.1234}};
 using output_format = PRIMA_FMT("%f");
-constexpr const std::array<float, 4> output_values = {
-    {0.0, 100.0, -100.00, 1234.1234}};
 
 
-template <typename Derived> class bench_base
+//
+// Benchmark Code
+//
+template <typename Derived>
+using simple_float_base =
+    prima::benchmark::sprintf::implementation_base<Derived, 16>;
+
+class system_impl : public simple_float_base<system_impl>
 {
 public:
-    bench_base() = default;
-
-    unsigned operator()() const
-    {
-        unsigned code{0};
-        for (const float output_value : output_values)
-        {
-            std::array<char, 25> buffer = {{0}};
-            self().benchmark(buffer, output_value);
-            {
-                const char* current = std::begin(buffer);
-                while (*current)
-                {
-                    code += *current;
-                    --current;
-                }
-            }
-        }
-        return code;
-    }
-
-private:
-    const Derived& self() const
-    {
-        return *static_cast<const Derived*>(this);
-    }
-};
-
-class system_bench : public bench_base<system_bench>
-{
-public:
-    system_bench() = default;
+    system_impl() = default;
 
     static constexpr const char* name()
     {
         return "std::sprintf";
     }
 
-    template <std::size_t BufferSize>
-    void benchmark(std::array<char, BufferSize>& buffer,
-                   const float output_value) const
+    void benchmark(output_buffer& buffer, const float input) const
     {
         std::sprintf(std::begin(buffer),
                      boost::mpl::c_str<output_format>::value,
-                     output_value);
+                     input);
     }
 };
 
-class checked_system_bench : public bench_base<system_bench>
+class checked_system_impl : public simple_float_base<system_impl>
 {
 public:
-    checked_system_bench() = default;
+    checked_system_impl() = default;
 
     static constexpr const char* name()
     {
         return "std::snprintf";
     }
 
-    template <std::size_t BufferSize>
-    void benchmark(std::array<char, BufferSize>& buffer,
-                   const float output_value) const
+    void benchmark(output_buffer& buffer, const float input) const
     {
         std::snprintf(std::begin(buffer),
                       buffer.size(),
                       boost::mpl::c_str<output_format>::value,
-                      output_value);
+                      input);
     }
 };
 
-class prima_bench : public bench_base<prima_bench>
+class prima_impl : public simple_float_base<prima_impl>
 {
 public:
-    prima_bench() = default;
+    prima_impl() = default;
 
     static constexpr const char* name()
     {
         return "prima::sprintf";
     }
 
-    template <std::size_t BufferSize>
-    void benchmark(std::array<char, BufferSize>& buffer,
-                   const float output_value) const
+    void benchmark(output_buffer& buffer, const float input) const
     {
-        prima::sprintf<output_format>(std::begin(buffer), output_value);
+        prima::sprintf<output_format>(std::begin(buffer), input);
     }
 };
 
-class checked_prima_bench : public bench_base<prima_bench>
+class checked_prima_impl : public simple_float_base<prima_impl>
 {
 public:
-    checked_prima_bench() = default;
+    checked_prima_impl() = default;
 
     static constexpr const char* name()
     {
         return "prima::snprintf";
     }
 
-    template <std::size_t BufferSize>
-    void benchmark(std::array<char, BufferSize>& buffer,
-                   const float output_value) const
+    void benchmark(output_buffer& buffer, const float input) const
     {
         prima::snprintf<output_format>(std::begin(buffer),
                                        buffer.size(),
-                                       output_value);
+                                       input);
+    }
+};
+
+struct MakeScenario
+{
+    MakeScenario() = default;
+    using result_type = prima::benchmark::scenario<float>;
+
+    result_type operator()(const float input) const
+    {
+        std::string name{};
+        prima::sprintf<PRIMA_FMT("\"%s\" with input %f")>(
+            std::back_inserter(name),
+            boost::mpl::c_str<output_format>::value,
+            input);
+        return result_type{std::move(name), input};
     }
 };
 }
 
 int main()
 {
-    prima::printf<PRIMA_FMT("Benchmarking format \"%s\" with values:\n    ")>(
-        boost::mpl::c_str<output_format>::value);
+    namespace adaptors = boost::adaptors;
+    namespace range = boost::range;
 
-    std::size_t count = 0;
-    for (const float output_value : output_values)
-    {
-        ++count;
-        const char* const append_string =
-            (count == output_values.size()) ? "" : ", ";
-        prima::printf<PRIMA_FMT("%f%s")>(output_value, append_string);
-    }
+    std::vector<prima::benchmark::scenario<float>> scenarios{};
+    scenarios.reserve(inputs.size());
+    range::copy(inputs | adaptors::transformed(MakeScenario{}),
+                std::back_inserter(scenarios));
 
-    std::cout << std::endl;
-
-    // always return value, prevents compiler from
-    // optimizing benchmarks as dead-code
-    return prima::benchmark::run(1000000,
-                                 system_bench{},
-                                 checked_system_bench{},
-                                 prima_bench{},
-                                 checked_prima_bench{}) != 0;
+    using implementations = std::
+        tuple<system_impl, checked_system_impl, prima_impl, checked_prima_impl>;
+    return !prima::benchmark::run(implementations{},
+                                  std::move(scenarios),
+                                  trials);
 }
