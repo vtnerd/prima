@@ -17,12 +17,17 @@ Prima output I/O matches the behavior of the standard C behavior. Some flags are
 :---------------:|--------------------------------------------------------------------------------|-----------------
        d, i      |         Any built-in signed integer type (char, short, int, etc.)              | Width, Precision, '-', '0', ' ', and '+'.
 e, E, f, F, g, G |                               float, and double                                | Width, Precision, '-', '0', ' ', '+', and '#'
-        u        | Any unsigned integer type (unsigned char, unsigned short, unsigned int, etc.)  | Width, Precision, '-', '0', ' ', and '+'.
-   o, x, X       |  Any unsigned integer type (unsigned char, unsigned short, unsigned int, etc.) | Width, Precision, '-', '0', ' ', '+', and '#'.
+        u        | Any unsigned integer type (unsigned char, unsigned short, unsigned int, etc.)  | Width, Precision, '-', and '0'.
+   o, x, X       |  Any unsigned integer type (unsigned char, unsigned short, unsigned int, etc.) | Width, Precision, '-', and '0'.
        s         |                           const char*, std::string                             | Width, Precision, and '-'
       
 > * The length modifiers ('hh', 'll', etc.) are _not_ supported, because variadic templates are used instead of the type opaque C variadic arguments (so they are not needed).
 > * Pointers can be output by converting to `std::uintptr_t` and using any of the format flags that support an unsigned integer type ("%p" is not needed).
+> * A zero length width is a compile-time error.
+> * The '0' flag with no specified width is a compile-time error.
+> * The combination of flags '+' and ' ' is a compile-time error.
+> * The combination of flags '0' and '-' is a compile-time error.
+> * The combination of the '0' flag and usage of the precision field with an integer format flag (d, i, u, o, x, X) is a compile-time error.
       
 ## Usage ##
 The prima I/O functions require a variadic compile-time string as input. A macro `PRIMA_FMT` can convert a string literal to the compile-time string in a C++11 compatible compiler. The user-literal `prima::literals::_fmt` can be used in compilers that support [literal operator templates for strings](http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html):

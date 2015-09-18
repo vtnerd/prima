@@ -78,6 +78,17 @@ namespace backend
                           (prima::test::generate<PRIMA_FMT("%.0i"), Backend>(
                               std::numeric_limits<std::int64_t>::min())));
             BOOST_TEST_EQ(
+                "001024",
+                (prima::test::generate_and_system_compare<PRIMA_FMT("%06i"),
+                                                          Backend>(1024)));
+            BOOST_TEST_EQ(
+                "-01024",
+                (prima::test::generate_and_system_compare<PRIMA_FMT("%06i"),
+                                                          Backend>(-1024)));
+            BOOST_TEST_EQ("-9223372036854775808",
+                          (prima::test::generate<PRIMA_FMT("%.0i"), Backend>(
+                              std::numeric_limits<std::int64_t>::min())));
+            BOOST_TEST_EQ(
                 "-100`",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%.0i`"),
                                                           Backend>(-100)));
