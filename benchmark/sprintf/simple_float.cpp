@@ -103,8 +103,9 @@ public:
 
 struct MakeScenario
 {
-    MakeScenario() = default;
     using result_type = prima::benchmark::scenario<float>;
+
+    MakeScenario() = default;
 
     result_type operator()(const float input) const
     {
@@ -113,7 +114,7 @@ struct MakeScenario
             std::back_inserter(name),
             boost::mpl::c_str<output_format>::value,
             input);
-        return result_type{std::move(name), input};
+        return {std::move(name), input};
     }
 };
 }
