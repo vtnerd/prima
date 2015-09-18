@@ -26,6 +26,7 @@
 #include "prima/ir/base.hpp"
 #include "prima/ir/output/base.hpp"
 #include "prima/ir/output/fields.hpp"
+#include "prima/ir/manip.hpp"
 #include "prima/meta/base.hpp"
 
 namespace prima
@@ -130,8 +131,9 @@ namespace backend
         //
         // upper_case
         //
-        struct upper_case
+        template <typename Fields> struct upper_case
         {
+        private:
             template <typename Inner, typename Case> struct impl
             {
                 static auto apply(const Inner& inner)
@@ -150,7 +152,8 @@ namespace backend
                 }
             };
 
-            template <typename Fields, typename Inner>
+        public:
+            template <typename Inner>
             static decltype(auto) apply(const Inner& inner)
             {
                 return impl<
@@ -163,8 +166,9 @@ namespace backend
         //
         // width
         //
-        struct width
+        template <typename Fields> struct width
         {
+        private:
             template <typename, typename> struct impl;
 
             template <typename Justification>
@@ -201,7 +205,8 @@ namespace backend
                 }
             };
 
-            template <typename Fields, typename Inner>
+        public:
+            template <typename Inner>
             static decltype(auto) apply(const Inner& inner, const char pad)
             {
                 namespace fields = ir::output::fields;
@@ -514,7 +519,7 @@ namespace backend
                 using float_generator =
                     boost::spirit::karma::real_generator<double, real_policy>;
                 return boost::proto::deep_copy(
-                    upper_case::apply<Fields>(float_generator{}));
+                    upper_case<Fields>::apply(float_generator{}));
             }
         };
 
@@ -524,6 +529,17 @@ namespace backend
         template <typename Fields>
         struct generate_tree<ir::output::int_<Fields>>
         {
+            template <typename Radix> struct absolute_value
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    return boost::proto::deep_copy(
+                        boost::spirit::karma::duplicate
+                            [inner[absolute_value_1<Radix>{}]
+                             << inner[absolute_value_2<Radix>{}]]);
+                }
+            };
+
             template <typename, typename> struct precision;
 
             template <typename Ignored>
@@ -554,31 +570,92 @@ namespace backend
                     namespace karma = boost::spirit::karma;
                     return boost::proto::deep_copy(
                         karma::duplicate
-                            [((karma::skip[inner][not_negative{}]) | '-')
-                             << karma::right_align(Precision, '0')
-                                 [karma::duplicate
-                                      [inner[absolute_value_1<Radix>{}]
-                                       << inner[absolute_value_2<Radix>{}]]]]);
+                            [((boost::spirit::karma::skip[inner][not_negative{}]) |
+                              '-')
+                             << karma::right_align(
+                                 Precision,
+                                 '0')[absolute_value<Radix>::apply(inner)]]);
                 }
             };
 
-            template <typename, typename> struct spacer
+            template <typename, typename, typename, typename>
+            struct width_and_spacer
             {
                 template <typename Inner>
-                static const Inner& apply(const Inner& inner)
+                static decltype(auto) apply(const Inner& inner)
                 {
-                    return inner;
+                    return width<Fields>::apply(inner, ' ');
                 }
             };
 
-            template <char Spacer>
-            struct spacer<meta::true_, meta::char_<Spacer>>
+            template <char Spacer, typename Radix>
+            struct width_and_spacer<ir::output::values::pad_with_space,
+                                    meta::true_,
+                                    meta::char_<Spacer>,
+                                    Radix>
             {
-                template <typename Inner>
-                static const auto apply(const Inner& inner)
+                template <typename Inner> static auto apply(const Inner& inner)
                 {
+                    return boost::proto::deep_copy(width<Fields>::apply(
+                        (((Spacer << inner)[not_negative{}]) | inner), ' '));
+                }
+            };
+
+            template <char Spacer, typename Radix>
+            struct width_and_spacer<ir::output::values::pad_with_zero,
+                                    meta::true_,
+                                    meta::char_<Spacer>,
+                                    Radix>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    namespace iro = ir::output;
+                    namespace karma = boost::spirit::karma;
+
+                    using specified_width =
+                        ir::get_field_t<Fields, iro::fields::width>;
+                    static_assert(!meta::is_void_<specified_width>::value,
+                                  "bad ir");
+
+                    using real_fields = typename ir::manip::update_field_t<
+                        iro::int_<Fields>,
+                        iro::fields::width,
+                        iro::values::width<specified_width::value - 1>>::fields;
+
                     return boost::proto::deep_copy(
-                        ((Spacer << inner)[not_negative{}]) | inner);
+                        karma::duplicate
+                            [((Spacer << karma::skip[inner])[not_negative{}] |
+                              '-')
+                             << width<real_fields>::apply(
+                                 absolute_value<Radix>::apply(inner), '0')]);
+                }
+            };
+
+            template <typename Spacer, typename Radix>
+            struct width_and_spacer<ir::output::values::pad_with_zero,
+                                    meta::false_,
+                                    Spacer,
+                                    Radix>
+            {
+                template <typename Inner> static auto apply(const Inner& inner)
+                {
+                    namespace iro = ir::output;
+                    namespace karma = boost::spirit::karma;
+
+                    using specified_width =
+                        ir::get_field_t<Fields, iro::fields::width>;
+                    static_assert(!meta::is_void_<specified_width>::value,
+                                  "bad ir");
+
+                    using real_fields = typename ir::manip::update_field_t<
+                        iro::int_<Fields>,
+                        iro::fields::width,
+                        iro::values::width<specified_width::value - 1>>::fields;
+
+                    return boost::proto::deep_copy(
+                        (width<Fields>::apply(inner, '0')[not_negative{}]) |
+                        ('-' << width<real_fields>::apply(
+                             absolute_value<Radix>::apply(inner), '0')));
                 }
             };
 
@@ -586,11 +663,10 @@ namespace backend
             {
                 namespace fields = ir::output::fields;
 
-                static_assert(meta::length_t<Fields>::value == 9,
-                              "invalid fields");
+                static_assert(meta::length_t<Fields>::value == 9, "bad ir");
                 static_assert(
                     !ir::get_field_value<Fields, fields::use_alternate_format>(),
-                    "'#' flag has no effect on integers");
+                    "bad ir");
 
                 constexpr const bool space_flag =
                     ir::get_field_value<Fields,
@@ -598,25 +674,27 @@ namespace backend
                 constexpr const bool sign_flag =
                     ir::get_field_value<Fields, fields::always_print_sign>();
 
-                static_assert(!(sign_flag && space_flag),
-                              "'+' and ' ' flags cannot be set at the same "
-                              "time");
+                static_assert(!(sign_flag && space_flag), "bad ir");
 
-                using radix = ir::get_field_t<Fields, fields::radix>;
+                using radix_field = ir::get_field_t<Fields, fields::radix>;
                 using int_generator =
                     boost::spirit::karma::int_generator<std::intmax_t,
-                                                        radix::value,
+                                                        radix_field::value,
                                                         false>;
                 using add_spacer = meta::bool_<space_flag || sign_flag>;
                 using precision_field =
                     ir::get_field_t<Fields, fields::precision>;
                 using spacer_char = meta::char_ < space_flag ? ' ' : '+' > ;
+                using zero_field =
+                    ir::get_field_t<Fields, fields::pad_with_zero>;
 
-                return boost::proto::deep_copy(width::apply<Fields>(
-                    spacer<add_spacer, spacer_char>::apply(
-                        precision<precision_field, radix>::apply(
-                            int_generator{})),
-                    ' '));
+                return boost::proto::deep_copy(
+                    width_and_spacer<zero_field,
+                                     add_spacer,
+                                     spacer_char,
+                                     radix_field>::
+                        apply(precision<precision_field, radix_field>::apply(
+                            int_generator{})));
             }
         };
 
@@ -693,17 +771,16 @@ namespace backend
             static auto apply()
             {
                 namespace fields = ir::output::fields;
-                static_assert(meta::length_t<Fields>::value == 7,
-                              "invalid fields");
+                static_assert(meta::length_t<Fields>::value == 7, "bad ir");
 
                 using alternate_field =
                     ir::get_field_t<Fields, fields::use_alternate_format>;
                 constexpr const unsigned radix =
                     ir::get_field_value<Fields, fields::radix>();
 
-                static_assert(
-                    !alternate_field::value || radix == 8 || radix == 16,
-                    "alternate format can only be used with radix 8 or 16");
+                static_assert(!alternate_field::value || radix == 8 ||
+                                  radix == 16,
+                              "bad ir");
 
                 constexpr const unsigned precision_req =
                     ir::get_field_value<Fields, fields::precision>();
@@ -722,7 +799,7 @@ namespace backend
                     boost::spirit::karma::uint_generator<unsigned long long,
                                                          radix>;
                 return boost::proto::deep_copy(
-                    upper_case::apply<Fields>(width::apply<Fields>(
+                    upper_case<Fields>::apply(width<Fields>::apply(
                         alternate<alternate_field, radix, bool>::apply(
                             precision<precision_field, bool>::apply(
                                 uint_generator{})),
@@ -775,7 +852,7 @@ namespace backend
                 static_assert(meta::length_t<Fields>::value == 4,
                               "invalid fields");
 
-                return boost::proto::deep_copy(width::apply<Fields>(
+                return boost::proto::deep_copy(width<Fields>::apply(
                     add_precision<ir::get_field_t<Fields, fields::precision>>::
                         apply(boost::spirit::karma::string),
                     ' '));
