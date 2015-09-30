@@ -102,6 +102,7 @@ namespace backend
                                   std::numeric_limits<std::int64_t>::max())));
             }
             {
+#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 using test_format = PRIMA_FMT("%06i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<test_format, Backend>(
@@ -121,6 +122,7 @@ namespace backend
                 BOOST_TEST_EQ("9223372036854775807",
                               (prima::test::generate<test_format, Backend>(
                                   std::numeric_limits<std::int64_t>::max())));
+#endif
             }
             {
                 using test_format = PRIMA_FMT("%.0i`");
