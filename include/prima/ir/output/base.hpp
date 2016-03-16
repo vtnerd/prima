@@ -17,18 +17,19 @@ namespace ir
         {
             using type = float_;
             using fields = Fields;
-        };
 
-        template <typename Fields, typename Field>
-        constexpr bool has_field(const float_<Fields>&, const Field&) noexcept
-        {
-            namespace fields_ = ::prima::ir::output::fields;
-            return is_any_field<Field,
-                                fields_::format_field,
-                                fields_::numeric_field,
-                                fields_::signed_numeric_field,
-                                fields_::real_field>::value;
-        }
+
+            template <typename Test>
+            friend constexpr bool has_field(float_ const&, Test const&) noexcept
+            {
+                namespace fields_ = ::prima::ir::output::fields;
+                return is_any_field<Test,
+                                    fields_::format_field,
+                                    fields_::numeric_field,
+                                    fields_::signed_numeric_field,
+                                    fields_::real_field>::value;
+            }
+        };
 
         //
         // int
@@ -37,18 +38,18 @@ namespace ir
         {
             using type = int_;
             using fields = Fields;
-        };
 
-        template <typename Fields, typename Field>
-        constexpr bool has_field(const int_<Fields>&, const Field&) noexcept
-        {
-            namespace fields_ = ::prima::ir::output::fields;
-            return is_any_field<Field,
-                                fields_::format_field,
-                                fields_::numeric_field,
-                                fields_::signed_numeric_field>::value &&
-                   Field::value != fields_::upper_case::value;
-        }
+            template <typename Test>
+            friend constexpr bool has_field(int_ const&, Test const&) noexcept
+            {
+                namespace fields_ = ::prima::ir::output::fields;
+                return is_any_field<Test,
+                                    fields_::format_field,
+                                    fields_::numeric_field,
+                                    fields_::signed_numeric_field>::value &&
+                       Test::value != fields_::upper_case::value;
+            }
+        };
 
         //
         // string
@@ -57,15 +58,15 @@ namespace ir
         {
             using type = string;
             using fields = Fields;
-        };
 
-        template <typename Fields, typename Field>
-        constexpr bool has_field(const string<Fields>&, const Field&) noexcept
-        {
-            namespace fields_ = ::prima::ir::output::fields;
-            return is_field<Field, fields_::format_field>::value &&
-                   Field::value != fields_::upper_case::value;
-        }
+            template <typename Test>
+            friend constexpr bool has_field(string const&, Test const&) noexcept
+            {
+                namespace fields_ = ::prima::ir::output::fields;
+                return is_field<Test, fields_::format_field>::value &&
+                       Test::value != fields_::upper_case::value;
+            }
+        };
 
         //
         // unsigned
@@ -74,17 +75,19 @@ namespace ir
         {
             using type = unsigned_;
             using fields = Fields;
-        };
 
-        template <typename Fields, typename Field>
-        constexpr bool
-        has_field(const unsigned_<Fields>&, const Field&) noexcept
-        {
-            namespace fields_ = ::prima::ir::output::fields;
-            return is_any_field<Field,
-                                fields_::format_field,
-                                fields_::numeric_field>::value;
-        }
+            template <typename Test>
+            friend constexpr bool
+            has_field(unsigned_ const&, Test const&) noexcept
+            {
+                namespace fields_ = ::prima::ir::output::fields;
+                static_assert(is_any_field<Test,
+                                           fields_::format_field,
+                                           fields_::numeric_field>::value,
+                              "tits up");
+                return true;
+            }
+        };
     } // output
 } // ir
 } // prima
