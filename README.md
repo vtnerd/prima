@@ -4,7 +4,9 @@ Prima is an implementation of the C I/O functions that parses the format string 
 > This library is a work in-progress.
 
 ## Dependencies ##
-Prima currently requires boost 1.42+, and [mpllibs](https://github.com/sabel83/mpllibs). The metaparse portion of mplllibs has been accepted into boost, so prima will drop the separate dependency when that library is merged into boost (hopefully 1.60!). Also, there are a few bugs in `boost::spirit::karma` prior to version 1.59, so some flag combinations will trigger a static assert when older boost releases are detected. Comments in the prima source indicate how karma can be patched to correct these issues.
+Prima currently requires boost 1.42+, and [mpllibs](https://github.com/sabel83/mpllibs). The metaparse portion of mplllibs has been accepted into boost, so prima will drop the separate dependency when that library is merged into boost (hopefully 1.60!). Also, there are a few bugs in `boost::spirit::karma` prior to version 1.60, so some flag combinations will trigger a static assert when older boost releases are detected. Comments in the prima source indicate how karma can be patched to correct these issues.
+
+> **Note:** Metaparse should be included in Boost 1.61. This will become the required version of Boost when it is released, due to the Karma bugs and ease-of-targeting a Boost dependency.
 
 ## Supported Formatting ##
 #### Input ####
@@ -34,11 +36,11 @@ The prima I/O functions require a variadic compile-time string as input. A macro
 
 ```c++
 {
-    prima::printf<PRIMA_FMT("hello %s")>("world");
+    prima::printf(PRIMA_FMT("%s"), "world");
 }
 {
     using prima::literals;
-    prima::printf<"hello %s"_fmt>("world");
+    prima::printf("hello %s"_fmt, "world");
 }
 ```
 The user string literal `_fmt` is the preferred method, because it will have more efficient _compile_-times.
@@ -48,7 +50,7 @@ The user string literal `_fmt` is the preferred method, because it will have mor
 Behaves just like `std::printf`:
 
 ```c++
-prima::printf<PRIMA_FMT("hello %s")>("world");
+prima::printf(PRIMA_FMT("hello %s"), "world");
 ```
 
 ##### sprintf #####
@@ -58,12 +60,12 @@ prima::printf<PRIMA_FMT("hello %s")>("world");
 {
     char buffer[100] = {0};
     // Never checks for buffer size. Does not null-terminate.
-    prima::sprintf<PRIMA_FMT("hello %s")>(std::begin(buffer), "world");
+    prima::sprintf(std::begin(buffer), PRIMA_FMT("hello %s"), "world");
 }
 {
     std::string buffer{};
     // Throws if std::bad_alloc. Implicitly null-terminated due to std::string.
-    prima::sprintf<PRIMA_FMT("hello %s")>(std::back_inserter(buffer), "world");
+    prima::sprintf(std::back_inserter(buffer), PRIMA_FMT("hello %s"), "world");
 }
 ```
 `prima::sprintf` will also update the output iterator to one-past the last write location, iff the argument is passed as a mutable l-value.
@@ -75,13 +77,13 @@ prima::printf<PRIMA_FMT("hello %s")>("world");
 {
     char buffer[100] = {0};
     // Does not null-terminate. Stops after sizeof(buffer) bytes (not sizeof(buffer) - 1).
-    prima::snprintf<PRIMA_FMT("hello %s")>(std::begin(buffer), sizeof(buffer), "world");
+    prima::snprintf(std::begin(buffer), PRIMA_FMT("hello %s"), sizeof(buffer), "world");
 }
 {
     std::string buffer{};
     buffer.resize(100);
     // Implicitly null-terminated due to std::string. Stops after buffer.size() bytes.
-    prima::snprintf<PRIMA_FMT("hello %s")>(&buffer[0], buffer.size(), "world");
+    prima::snprintf(&buffer[0], PRIMA_FMT("hello %s"), buffer.size(), "world");
 }
 ```
 `prima::snprintf` will also update the output iterator to one-past the last write location, iff the argument is passed as a mutable l-value.
@@ -96,7 +98,7 @@ Not yet-implemented. Will support `boost::spirit::qi` and default to `boost::spi
 
 ```c++
 using prima::literals;
-prima::printf<"hello %s"_fmt, prima::backend::karma>("world");
+prima::printf.call<prima::backend::karma>()("hello %s"_fmt, "world");
 ```
 
 ## Performance Benchmarks ##
@@ -110,3 +112,4 @@ Benchmarking with 1000000 runs each...
       prima::sprintf :  0.304215 microseconds per run {checksum: b626dc0}
      prima::snprintf :  0.313224 microseconds per run {checksum: b626dc0}
 ```
+> **Note:** This needs to be re-run and updated.
