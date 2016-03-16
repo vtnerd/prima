@@ -10,23 +10,25 @@
 
 namespace prima
 {
-//! template <typename Format,
-//!           typename Backend = backend::karma,
+//! template <typename Backend = backend::karma,
+//!           char... Format,
 //!           typename... Args>
 //! bool sprintf(Iterator&& out, Args&&... args)
 //!
-//! Outputs `Format` with `args` to `std::cout` using `Backend`.
+//! Outputs `format` with `args` to `std::cout` using `Backend`.
 //!
-//! \requires `Format` is a valid prima format string.
+//! \requires `Format` is a valid prima output format string.
 //!
 //! \throws Unspecified if `Backend::generate` throws.
 //! \throws Unspecified if `std::cout` is configured to throw on errors.
 //!
 //! \returns `std::cout.good()`.
-template <typename Format, typename Backend = backend::karma, typename... Args>
-bool printf(Args&&... args)
+template <typename Backend = backend::karma, char... Format, typename... Args>
+bool printf(meta::string<Format...> const& format, Args&&... args)
 {
-    return fprintf<Format, Backend>(std::cout, std::forward<Args>(args)...);
+    return prima::fprintf<Backend>(std::cout,
+                                   format,
+                                   std::forward<Args>(args)...);
 }
 } // prima
 

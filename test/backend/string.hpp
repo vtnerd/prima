@@ -17,28 +17,23 @@ namespace backend
     {
         template <typename Backend> void string_tests()
         {
+            BOOST_TEST_EQ("|report string|",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("|%s|"), "report string")));
             BOOST_TEST_EQ(
                 "|report string|",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("|%s|"),
-                                                          Backend>(
-                    "report string")));
-            BOOST_TEST_EQ("|report string|",
-                          (prima::test::generate<PRIMA_FMT("|%s|"), Backend>(
-                              std::string{"report string"})));
-            BOOST_TEST_EQ(
-                "|repor|",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("|%.5s|"),
-                                                          Backend>(
-                    "report string")));
-            BOOST_TEST_EQ(
-                "| repor|",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("|%6.5s|"),
-                                                          Backend>(
-                    "report string")));
+                (prima::test::generate<Backend>(PRIMA_FMT("|%s|"),
+                                                std::string{"report string"})));
+            BOOST_TEST_EQ("|repor|",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("|%.5s|"), "report string")));
+            BOOST_TEST_EQ("| repor|",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("|%6.5s|"), "report string")));
             BOOST_TEST_EQ("|repo   |",
                           (prima::test::generate_and_system_compare<
-                              PRIMA_FMT("|%-6.4s |"),
-                              Backend>("report string")));
+                              Backend>(PRIMA_FMT("|%-6.4s |"),
+                                       "report string")));
         }
     } // test
 } // backend

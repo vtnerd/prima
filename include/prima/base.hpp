@@ -9,7 +9,7 @@
 
 #ifndef MPLLIBS_CONFIG_NO_MPLLIBS_STRING
   #include <mpllibs/metaparse/string.hpp>
-  #define PRIMA_FMT(s) MPLLIBS_STRING((s))
+  #define PRIMA_FMT(s) MPLLIBS_STRING((s)){}
 #endif
 
 namespace prima

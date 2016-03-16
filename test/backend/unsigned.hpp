@@ -17,259 +17,223 @@ namespace backend
         template <typename Backend> void unsigned_tests()
         {
             // decimal
-            BOOST_TEST_EQ(
-                "0",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%u"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "100",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%u"),
-                                                          Backend>(100u)));
+            BOOST_TEST_EQ("0",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%u"), 0u)));
+            BOOST_TEST_EQ("100",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%u"), 100u)));
             BOOST_TEST_EQ("18446744073709551615",
-                          (prima::test::generate<PRIMA_FMT("%u"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%u"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0100",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.4u"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                " 0100",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%5.4u"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "0100 ",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%-5.4u"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "00100",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%05u"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "100`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0u`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("0100",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.4u"), 100u)));
+            BOOST_TEST_EQ(" 0100",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%5.4u"), 100u)));
+            BOOST_TEST_EQ("0100 ",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%-5.4u"), 100u)));
+            BOOST_TEST_EQ("00100",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%05u"), 100u)));
+            BOOST_TEST_EQ("100`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0u`"), 100)));
             BOOST_TEST_EQ("18446744073709551615`",
-                          (prima::test::generate<PRIMA_FMT("%.0u`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%.0u`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0u`"),
-                                                          Backend>(0u)));
+            BOOST_TEST_EQ("`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0u`"), 0u)));
 
             // octal
-            BOOST_TEST_EQ(
-                "0",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%o"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "144",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%o"),
-                                                          Backend>(100u)));
+            BOOST_TEST_EQ("0",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%o"), 0u)));
+            BOOST_TEST_EQ("144",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%o"), 100u)));
             BOOST_TEST_EQ("1777777777777777777777",
-                          (prima::test::generate<PRIMA_FMT("%o"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%o"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0144",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.4o"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                " 0144",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%5.4o"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "0144 ",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%-5.4o"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "00144",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%05o"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "144`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0o`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("0144",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.4o"), 100u)));
+            BOOST_TEST_EQ(" 0144",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%5.4o"), 100u)));
+            BOOST_TEST_EQ("0144 ",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%-5.4o"), 100u)));
+            BOOST_TEST_EQ("00144",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%05o"), 100u)));
+            BOOST_TEST_EQ("144`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0o`"), 100)));
             BOOST_TEST_EQ("1777777777777777777777`",
-                          (prima::test::generate<PRIMA_FMT("%.0o`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%.0o`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0o`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "0144`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#o`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0o`"), 0u)));
+            BOOST_TEST_EQ("0144`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#o`"), 100)));
             BOOST_TEST_EQ("01777777777777777777777`",
-                          (prima::test::generate<PRIMA_FMT("%#o`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%#o`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#o`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "0144`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0o`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("0`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#o`"), 0u)));
+            BOOST_TEST_EQ("0144`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#.0o`"), 100)));
             BOOST_TEST_EQ("01777777777777777777777`",
-                          (prima::test::generate<PRIMA_FMT("%#.0o`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%#.0o`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0o`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                " 0144`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#5.4o`"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "00144`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#.5o`"),
-                                                          Backend>(100u)));
+            BOOST_TEST_EQ("0`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#.0o`"), 0u)));
+            BOOST_TEST_EQ(" 0144`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#5.4o`"), 100u)));
+            BOOST_TEST_EQ("00144`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#.5o`"), 100u)));
 
             // lower case hex
-            BOOST_TEST_EQ(
-                "0",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%x"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "64",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%x"),
-                                                          Backend>(100u)));
+            BOOST_TEST_EQ("0",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%x"), 0u)));
+            BOOST_TEST_EQ("64",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%x"), 100u)));
             BOOST_TEST_EQ("ffffffffffffffff",
-                          (prima::test::generate<PRIMA_FMT("%x"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%x"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0064",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.4x"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                " 0064",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%5.4x"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "0064 ",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%-5.4x"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "00064",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%05x"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "64`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0x`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("0064",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.4x"), 100u)));
+            BOOST_TEST_EQ(" 0064",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%5.4x"), 100u)));
+            BOOST_TEST_EQ("0064 ",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%-5.4x"), 100u)));
+            BOOST_TEST_EQ("00064",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%05x"), 100u)));
+            BOOST_TEST_EQ("64`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0x`"), 100)));
             BOOST_TEST_EQ("ffffffffffffffff`",
-                          (prima::test::generate<PRIMA_FMT("%.0x`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%.0x`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0x`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "0x64`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#x`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0x`"), 0u)));
+            BOOST_TEST_EQ("0x64`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#x`"), 100)));
             BOOST_TEST_EQ("0xffffffffffffffff`",
-                          (prima::test::generate<PRIMA_FMT("%#x`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%#x`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#x`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "0x64`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0x`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("0`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#x`"), 0u)));
+            BOOST_TEST_EQ("0x64`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#.0x`"), 100)));
             BOOST_TEST_EQ("0xffffffffffffffff`",
-                          (prima::test::generate<PRIMA_FMT("%#.0x`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%#.0x`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0x`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "0x0064`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4x`"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "0x0064`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#06x`"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "  0000`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4x`"),
-                                                          Backend>(0u)));
+            BOOST_TEST_EQ("`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#.0x`"), 0u)));
+            BOOST_TEST_EQ("0x0064`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#6.4x`"), 100u)));
+            BOOST_TEST_EQ("0x0064`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#06x`"), 100u)));
+            BOOST_TEST_EQ("  0000`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#6.4x`"), 0u)));
 #ifndef PRIMA_TEST_LEFT_ALIGN_BUG
             // upper case hex
-            BOOST_TEST_EQ(
-                "0",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%X"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "64",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%X"),
-                                                          Backend>(100u)));
+            BOOST_TEST_EQ("0",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%X"), 0u)));
+            BOOST_TEST_EQ("64",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%X"), 100u)));
             BOOST_TEST_EQ("FFFFFFFFFFFFFFFF",
-                          (prima::test::generate<PRIMA_FMT("%X"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%X"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0064",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.4X"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                " 0064",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%5.4X"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "0064 ",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%-5.4X"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "00064",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%05X"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "64`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0X`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("0064",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.4X"), 100u)));
+            BOOST_TEST_EQ(" 0064",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%5.4X"), 100u)));
+            BOOST_TEST_EQ("0064 ",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%-5.4X"), 100u)));
+            BOOST_TEST_EQ("00064",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%05X"), 100u)));
+            BOOST_TEST_EQ("64`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0X`"), 100)));
             BOOST_TEST_EQ("FFFFFFFFFFFFFFFF`",
-                          (prima::test::generate<PRIMA_FMT("%.0X`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%.0X`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%.0X`"),
-                                                          Backend>(0u)));
-            BOOST_TEST_EQ(
-                "0X64`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#X`"),
-                                                          Backend>(100)));
+            BOOST_TEST_EQ("`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%.0X`"), 0u)));
+            BOOST_TEST_EQ("0X64`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#X`"), 100)));
             BOOST_TEST_EQ("0XFFFFFFFFFFFFFFFF`",
-                          (prima::test::generate<PRIMA_FMT("%#X`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%#X`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "0`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#X`"),
-                                                          Backend>(0u)));
+            BOOST_TEST_EQ("0`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#X`"), 0u)));
             BOOST_TEST_EQ(
                 "0X64`",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0X`"),
                                                           Backend>(100)));
             BOOST_TEST_EQ("0XFFFFFFFFFFFFFFFF`",
-                          (prima::test::generate<PRIMA_FMT("%#.0X`"), Backend>(
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("%#.0X`"),
                               std::numeric_limits<std::uint64_t>::max())));
-            BOOST_TEST_EQ(
-                "`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0X`"),
-                                                          Backend>(0u)));
+            BOOST_TEST_EQ("`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#.0X`"), 0u)));
 
-            BOOST_TEST_EQ(
-                "0X0064`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4X`"),
-                                                          Backend>(100u)));
-            BOOST_TEST_EQ(
-                "  0000`",
-                (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4X`"),
-                                                          Backend>(0u)));
+            BOOST_TEST_EQ("0X0064`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#6.4X`"), 100u)));
+            BOOST_TEST_EQ("  0000`",
+                          (prima::test::generate_and_system_compare<Backend>(
+                              PRIMA_FMT("%#6.4X`"), 0u)));
 #endif
         }
     } // test

@@ -16,20 +16,21 @@ namespace backend
     {
         template <typename Backend> void mixed_tests()
         {
+            BOOST_TEST_EQ("<-->",
+                          (prima::test::generate<Backend>(PRIMA_FMT("<-->"))));
             BOOST_TEST_EQ(
-                "<-->", (prima::test::generate<PRIMA_FMT("<-->"), Backend>()));
-            BOOST_TEST_EQ(
-                "<-%->",
-                (prima::test::generate<PRIMA_FMT("<-%%->"), Backend>()));
-            BOOST_TEST_EQ(
-                "Value:       6000\n",
-                (prima::test::generate<PRIMA_FMT("Value: %10u\n"), Backend>(6000u)));
+                "<-%->", (prima::test::generate<Backend>(PRIMA_FMT("<-%%->"))));
+            BOOST_TEST_EQ("Value:       6000\n",
+                          (prima::test::generate<Backend>(
+                              PRIMA_FMT("Value: %10u\n"), 6000u)));
             BOOST_TEST_EQ(
                 "Value:       6000\nValue:       7000\n",
-                (prima::test::generate<PRIMA_FMT("Value: %10u\nValue: %10u\n"), Backend>(6000u, 7000u)));
+                (prima::test::generate<Backend>(
+                    PRIMA_FMT("Value: %10u\nValue: %10u\n"), 6000u, 7000u)));
             BOOST_TEST_EQ(
                 "Value:     0X1770\nValue:     0x1b58\n",
-                (prima::test::generate<PRIMA_FMT("Value: %#10X\nValue: %#10x\n"), Backend>(6000u, 7000u)));
+                (prima::test::generate<Backend>(
+                    PRIMA_FMT("Value: %#10X\nValue: %#10x\n"), 6000u, 7000u)));
         }
     } // test
 } // backend

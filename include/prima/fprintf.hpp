@@ -11,31 +11,32 @@
 
 namespace prima
 {
-//! template <typename Format,
-//!           typename Backend = backend::karma,
+//! template <typename Backend = backend::karma,
 //!           typename CharT,
 //!           typename Traits,
+//!           char... Format,
 //!           typename... Args>
-//! bool sprintf(std::back_ostream<CharT, Traits>& out, Args&&... args)
+//! bool fprintf(std::back_ostream<CharT, Traits>& out, Args&&... args)
 //!
-//! Outputs `Format` with `args` to `out` using `Backend`. No NULL-termination
+//! Outputs `format` with `args` to `out` using `Backend`. No NULL-termination
 //! character is appended.
 //!
-//! \requires `Format` is a valid prima format string.
+//! \requires `Format` is a valid prima output format string.
 //!
 //! \throws Unspecified if `Backend::generate(...)` throws.
 //! \throws Unspecified if `out` is configured to throw on errors.
 //!
 //! \returns `out.good()`.
-template <typename Format,
-          typename Backend = backend::karma,
+template <typename Backend = backend::karma,
           typename CharT,
           typename Traits,
+          char... Format,
           typename... Args>
-bool fprintf(std::basic_ostream<CharT, Traits>& out, Args&&... args)
+bool fprintf(std::basic_ostream<CharT, Traits>& out, meta::string<Format...> const& format, Args&&... args)
 {
-    sprintf<Format, Backend>(std::ostream_iterator<CharT, CharT, Traits>{out},
-                             std::forward<Args>(args)...);
+  prima::sprintf<Backend>(std::ostreambuf_iterator<CharT, Traits>{out},
+                          format,
+                          std::forward<Args>(args)...);
     return out.good();
 }
 }
