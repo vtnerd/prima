@@ -39,7 +39,7 @@ namespace ir
             return false;
         }
 
-        struct has_field_fn
+        struct has_field_impl
         {
             template <typename Type, typename Field>
             constexpr bool
@@ -48,20 +48,9 @@ namespace ir
                 return has_field(type, field);
             }
         };
-
-        template <typename T> struct static_const
-        {
-            constexpr const static T value = T{};
-        };
-
-        template <typename T> constexpr const T static_const<T>::value;
     }
 
-    namespace
-    {
-        constexpr const auto& has_field =
-            detail::static_const<detail::has_field_fn>::value;
-    }
+    PRIMA_DETAIL_CONSTEXPR_ADDRESS(has_field, detail::has_field_impl);
 
     template <template <unsigned> class Field> struct is_field_func
     {
