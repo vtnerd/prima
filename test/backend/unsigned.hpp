@@ -192,10 +192,14 @@ namespace backend
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4x`"),
                                                           Backend>(100u)));
             BOOST_TEST_EQ(
+                "0x0064`",
+                (prima::test::generate_and_system_compare<PRIMA_FMT("%#06x`"),
+                                                          Backend>(100u)));
+            BOOST_TEST_EQ(
                 "  0000`",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4x`"),
                                                           Backend>(0u)));
-
+#ifndef PRIMA_TEST_LEFT_ALIGN_BUG
             // upper case hex
             BOOST_TEST_EQ(
                 "0",
@@ -216,12 +220,10 @@ namespace backend
                 " 0064",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%5.4X"),
                                                           Backend>(100u)));
-#ifndef PRIMA_TEST_LEFT_ALIGN_BUG
             BOOST_TEST_EQ(
                 "0064 ",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%-5.4X"),
                                                           Backend>(100u)));
-#endif
             BOOST_TEST_EQ(
                 "00064",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%05X"),
@@ -259,6 +261,7 @@ namespace backend
                 "`",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%#.0X`"),
                                                           Backend>(0u)));
+
             BOOST_TEST_EQ(
                 "0X0064`",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4X`"),
@@ -267,6 +270,7 @@ namespace backend
                 "  0000`",
                 (prima::test::generate_and_system_compare<PRIMA_FMT("%#6.4X`"),
                                                           Backend>(0u)));
+#endif
         }
     } // test
 } // backend
