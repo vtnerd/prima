@@ -32,11 +32,13 @@ template <typename Backend = backend::karma,
           typename Traits,
           char... Format,
           typename... Args>
-bool fprintf(std::basic_ostream<CharT, Traits>& out, meta::string<Format...> const& format, Args&&... args)
+bool fprintf(std::basic_ostream<CharT, Traits>& out,
+             meta::string<Format...> const& format,
+             Args&&... args)
 {
-  prima::sprintf<Backend>(std::ostreambuf_iterator<CharT, Traits>{out},
-                          format,
-                          std::forward<Args>(args)...);
+    prima::sprintf<Backend>(std::ostreambuf_iterator<CharT, Traits>{out},
+                            format,
+                            std::forward<Args>(args)...);
     return out.good();
 }
 }
