@@ -752,7 +752,7 @@ namespace backend
                 template <typename Inner> static auto apply(const Inner& inner)
                 {
                     return boost::proto::deep_copy(
-                        (("0" << inner)[not_zero{}]) | "0");
+                        (('0' << inner)[not_zero{}]) | '0');
                 }
             };
 
