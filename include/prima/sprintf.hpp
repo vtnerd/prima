@@ -3,14 +3,32 @@
 
 #include <utility>
 
-#include "prima/backend/karma.hpp"
+#include "prima/backend/karma.hpp" // hack include
 #include "prima/base.hpp"
+#include "prima/detail/constexpr_address.hpp"
+#include "prima/detail/output_func.hpp"
 #include "prima/detail/output_limit_iterator.hpp"
+#include "prima/detail/returns.hpp"
 #include "prima/frontend/sprintf.hpp"
 #include "prima/meta.hpp"
 
 namespace prima
 {
+namespace detail
+{
+    template <typename Backend> struct sprintf
+    {
+        template <typename Iterator, char... Format, typename... Args>
+        auto operator()(Iterator&& out,
+                        meta::string<Format...> const&,
+                        Args&&... args) const
+            PRIMA_DETAIL_RETURNS(
+                Backend::template generate<
+                    frontend::parse_sprintf_t<meta::string<Format...>>>(
+                    std::forward<Iterator>(out), std::forward<Args>(args)...))
+    };
+}
+
 //! template <typename Backend = backend::karma,
 //!           typename Iterator,
 //!           char... Format,
@@ -28,16 +46,34 @@ namespace prima
 //! \requires `Iterator` meets the requirements of the OutputIterator concept.
 //!
 //! \throws Unspecified iff `Backend::generate(...)` throws.
-template <typename Backend = backend::karma,
-          typename Iterator,
-          char... Format,
-          typename... Args>
-void sprintf(Iterator&& out, meta::string<Format...> const&, Args&&... args)
+PRIMA_DETAIL_CONSTEXPR_ADDRESS(sprintf, detail::output_func<detail::sprintf>);
+
+
+namespace detail
 {
-    Backend::template generate<
-        frontend::parse_sprintf_t<meta::string<Format...>>>(
-        std::forward<Iterator>(out), std::forward<Args>(args)...);
-}
+
+    template <typename Backend> struct snprintf
+    {
+        template <typename Iterator, char... Format, typename... Args>
+        std::size_t operator()(Iterator&& out,
+                               meta::string<Format...> const& format,
+                               const std::size_t max,
+                               Args&&... args) const
+        {
+            using real_iterator =
+                meta::if_t<meta::or_<meta::is_rvalue_reference<Iterator&&>,
+                                     meta::is_const<meta::decay_t<Iterator>>>,
+                           meta::remove_const_t<meta::decay_t<Iterator>>,
+                           Iterator>;
+            detail::output_limit_iterator<real_iterator> real_out{
+                max, std::forward<Iterator>(out)};
+            prima::sprintf.call<Backend>()(real_out,
+                                           format,
+                                           std::forward<Args>(args)...);
+            return real_out.characters_output();
+        }
+    };
+} // detail
 
 //! template<typename Backend = backend::karma,
 //!          typename Iterator,
@@ -61,25 +97,7 @@ void sprintf(Iterator&& out, meta::string<Format...> const&, Args&&... args)
 //!
 //! \returns The number of characters output. If the value exceeds `max`, it
 //!     indicates how many characters are needed for output.
-template <typename Backend = backend::karma,
-          typename Iterator,
-          char... Format,
-          typename... Args>
-std::size_t snprintf(Iterator&& out,
-                     meta::string<Format...> const& format,
-                     const std::size_t max,
-                     Args&&... args)
-{
-    using real_iterator =
-        meta::if_t<meta::or_<meta::is_rvalue_reference<Iterator&&>,
-                             meta::is_const<meta::decay_t<Iterator>>>,
-                   meta::remove_const_t<meta::decay_t<Iterator>>,
-                   Iterator>;
-    detail::output_limit_iterator<real_iterator> real_out{
-        max, std::forward<Iterator>(out)};
-    prima::sprintf<Backend>(real_out, format, std::forward<Args>(args)...);
-    return real_out.characters_output();
-}
+PRIMA_DETAIL_CONSTEXPR_ADDRESS(snprintf, detail::output_func<detail::snprintf>);
 } // prima
 
 #endif // PRIMA_SPRINTF_HPP

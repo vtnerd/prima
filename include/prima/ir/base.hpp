@@ -1,6 +1,7 @@
 #ifndef PRIMA_IR_BASE_HPP
 #define PRIMA_IR_BASE_HPP
 
+#include "prima/detail/constexpr_address.hpp"
 #include "prima/meta/base.hpp"
 #include "prima/meta/funcs.hpp"
 
