@@ -25,10 +25,8 @@ namespace detail
     };
 }
 
-//! template <typename Backend = backend::karma,
-//!           char... Format,
-//!           typename... Args>
-//! bool printf(Iterator&& out, Args&&... args)
+//! template <char... Format, typename... Args>
+//! bool printf(meta::string<Format...> const& format, Args&&... args)
 //!
 //! Outputs `format` with `args` to `std::cout` using `Backend`.
 //!

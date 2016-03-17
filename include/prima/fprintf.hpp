@@ -38,7 +38,9 @@ namespace detail
 //!           typename Traits,
 //!           char... Format,
 //!           typename... Args>
-//! bool fprintf(std::back_ostream<CharT, Traits>& out, Args&&... args)
+//! bool fprintf(std::back_ostream<CharT, Traits>& out,
+//!              meta::string<Format...> const& format,
+//!              Args&&... args)
 //!
 //! Outputs `format` with `args` to `out` using `Backend`. No NULL-termination
 //! character is appended.

@@ -29,8 +29,7 @@ namespace detail
     };
 }
 
-//! template <typename Backend = backend::karma,
-//!           typename Iterator,
+//! template <typename Iterator,
 //!           char... Format,
 //!           typename... Args>
 //! void sprintf(Iterator&& out,
@@ -75,8 +74,7 @@ namespace detail
     };
 } // detail
 
-//! template<typename Backend = backend::karma,
-//!          typename Iterator,
+//! template<typename Iterator,
 //!          typename Format,
 //!          typename... Args>
 //! std::size_t snprintf(Iterator&& out,
