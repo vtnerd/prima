@@ -20,7 +20,7 @@ namespace
 //
 constexpr const unsigned long trials = 1000000;
 constexpr const std::array<float, 4> inputs{{-100.0, 0.0, 100.0, 1234.1234}};
-using output_format = PRIMA_FMT("%f");
+using output_format = decltype(PRIMA_FMT("%f"));
 
 
 //
@@ -79,7 +79,7 @@ public:
 
     void benchmark(output_buffer& buffer, const float input) const
     {
-        prima::sprintf<output_format>(std::begin(buffer), input);
+        prima::sprintf(std::begin(buffer), output_format{}, input);
     }
 };
 
@@ -95,9 +95,8 @@ public:
 
     void benchmark(output_buffer& buffer, const float input) const
     {
-        prima::snprintf<output_format>(std::begin(buffer),
-                                       buffer.size(),
-                                       input);
+        prima::snprintf(
+            std::begin(buffer), output_format{}, buffer.size(), input);
     }
 };
 
@@ -110,10 +109,10 @@ struct MakeScenario
     result_type operator()(const float input) const
     {
         std::string name{};
-        prima::sprintf<PRIMA_FMT("\"%s\" with input %f")>(
-            std::back_inserter(name),
-            boost::mpl::c_str<output_format>::value,
-            input);
+        prima::sprintf(std::back_inserter(name),
+                       PRIMA_FMT("\"%s\" with input %f"),
+                       boost::mpl::c_str<output_format>::value,
+                       input);
         return {std::move(name), input};
     }
 };

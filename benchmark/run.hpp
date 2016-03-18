@@ -69,14 +69,14 @@ namespace benchmark
                                 const results& result,
                                 const unsigned long trials) const
                 {
-                    prima::printf<
-                        PRIMA_FMT("%20.20s :%10.6f microseconds per run ")>(
+                    prima::printf(
+                        PRIMA_FMT("%20.20s :%10.6f microseconds per run "),
                         implementation.name(),
                         average_microseconds(std::get<duration>(result),
                                              trials));
 
-                    prima::printf<PRIMA_FMT("{checksum: %x}")>(
-                        std::get<checksum>(result));
+                    prima::printf(PRIMA_FMT("{checksum: %x}"),
+                                  std::get<checksum>(result));
                     std::cout << std::endl;
                 }
             };
@@ -205,9 +205,11 @@ namespace benchmark
 
         for (const scenario<Input>& active_scenario : scenarios)
         {
-            prima::printf<PRIMA_FMT(
-                "Running %s benchmark %u times for each implementation...")>(
-                active_scenario.name(), trials);
+            prima::printf(
+                PRIMA_FMT(
+                    "Running %s benchmark %u times for each implementation..."),
+                active_scenario.name(),
+                trials);
             std::cout << std::endl;
 
             using zip = fusion::zip_view<
@@ -225,7 +227,7 @@ namespace benchmark
             fusion::make_fused(phoenix::bind(
                 typename run_::print_average{}, _1, _2, total_trials)));
         std::cout << std::flush;
-        
+
         return true;
     }
 } // benchmark
