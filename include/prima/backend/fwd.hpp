@@ -3,10 +3,10 @@
 
 namespace prima
 {
-  namespace backend
-  {
+namespace backend
+{
     class karma;
-  }
+}
 }
 
 #endif // PRIMA_BACKEND_FWD_HPP
