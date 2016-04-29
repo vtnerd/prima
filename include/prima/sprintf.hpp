@@ -22,10 +22,9 @@ namespace detail
         auto operator()(Iterator&& out,
                         meta::string<Format...> const&,
                         Args&&... args) const
-            PRIMA_DETAIL_RETURNS(
-                Backend::template generate<
-                    frontend::parse_sprintf_t<meta::string<Format...>>>(
-                    std::forward<Iterator>(out), std::forward<Args>(args)...))
+            PRIMA_DETAIL_RETURNS(Backend::template generate<
+                frontend::parse_sprintf_t<meta::string<Format...>>>(
+                std::forward<Iterator>(out), std::forward<Args>(args)...))
     };
 }
 
@@ -59,11 +58,11 @@ namespace detail
                                const std::size_t max,
                                Args&&... args) const
         {
-            using real_iterator =
-                meta::if_t<meta::or_<meta::is_rvalue_reference<Iterator&&>,
-                                     meta::is_const<meta::decay_t<Iterator>>>,
-                           meta::remove_const_t<meta::decay_t<Iterator>>,
-                           Iterator>;
+            using real_iterator = meta::if_t<
+                meta::or_<meta::is_rvalue_reference<Iterator&&>,
+                          meta::is_const<meta::remove_reference_t<Iterator>>>,
+                meta::remove_const_t<meta::decay_t<Iterator>>,
+                Iterator>;
             detail::output_limit_iterator<real_iterator> real_out{
                 max, std::forward<Iterator>(out)};
             prima::sprintf.call<Backend>()(real_out,

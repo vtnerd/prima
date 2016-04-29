@@ -18,7 +18,6 @@ namespace ir
             using type = float_;
             using fields = Fields;
 
-
             template <typename Test>
             friend constexpr bool has_field(float_ const&, Test const&) noexcept
             {
@@ -81,11 +80,9 @@ namespace ir
             has_field(unsigned_ const&, Test const&) noexcept
             {
                 namespace fields_ = ::prima::ir::output::fields;
-                static_assert(is_any_field<Test,
-                                           fields_::format_field,
-                                           fields_::numeric_field>::value,
-                              "tits up");
-                return true;
+                return is_any_field<Test,
+                                    fields_::format_field,
+                                    fields_::numeric_field>::value;
             }
         };
     } // output

@@ -1,21 +1,21 @@
 #ifndef PRIMA_FRONTEND_SPRINTF_HPP
 #define PRIMA_FRONTEND_SPRINTF_HPP
 
-#include <mpllibs/metaparse/always.hpp>
-#include <mpllibs/metaparse/always_c.hpp>
-#include <mpllibs/metaparse/any.hpp>
-#include <mpllibs/metaparse/build_parser.hpp>
-#include <mpllibs/metaparse/digit.hpp>
-#include <mpllibs/metaparse/foldl1.hpp>
-#include <mpllibs/metaparse/foldlp.hpp>
-#include <mpllibs/metaparse/int_.hpp>
-#include <mpllibs/metaparse/last_of.hpp>
-#include <mpllibs/metaparse/lit_c.hpp>
-#include <mpllibs/metaparse/one_char_except.hpp>
-#include <mpllibs/metaparse/one_of.hpp>
-#include <mpllibs/metaparse/return_.hpp>
-#include <mpllibs/metaparse/sequence.hpp>
-#include <mpllibs/metaparse/transform.hpp>
+#include <boost/metaparse/always.hpp>
+#include <boost/metaparse/always_c.hpp>
+#include <boost/metaparse/build_parser.hpp>
+#include <boost/metaparse/digit.hpp>
+#include <boost/metaparse/foldl1.hpp>
+#include <boost/metaparse/foldl_start_with_parser.hpp>
+#include <boost/metaparse/int_.hpp>
+#include <boost/metaparse/last_of.hpp>
+#include <boost/metaparse/lit_c.hpp>
+#include <boost/metaparse/one_char_except.hpp>
+#include <boost/metaparse/one_of.hpp>
+#include <boost/metaparse/repeated_one_of.hpp>
+#include <boost/metaparse/return_.hpp>
+#include <boost/metaparse/sequence.hpp>
+#include <boost/metaparse/transform.hpp>
 
 #include "prima/ir/base.hpp"
 #include "prima/ir/make.hpp"
@@ -30,7 +30,7 @@ namespace frontend
 {
     namespace detail
     {
-        namespace mp = mpllibs::metaparse;
+        namespace mp = boost::metaparse;
         namespace oir = ir::output;
 
         struct generate_format_func
@@ -120,7 +120,7 @@ namespace frontend
                          oir::make::unsigned_<oir::values::radix<16>,
                                               oir::values::upper_case>>>;
 
-        using flags = mp::any<mp::one_of<
+        using flags = mp::repeated_one_of<
             mp::always_c<
                 '#',
                 meta::vector<oir::fields::use_alternate_format, meta::true_>>,
@@ -133,7 +133,7 @@ namespace frontend
             mp::always_c<'-',
                          meta::vector<oir::fields::left_justified, meta::true_>>,
             mp::always_c<'0',
-                         meta::vector<oir::fields::pad_with_zero, meta::true_>>>>;
+                         meta::vector<oir::fields::pad_with_zero, meta::true_>>>;
         using width = mp::one_of<int_, mp::return_<meta::void_>>;
         using precision = mp::one_of<mp::last_of<mp::lit_c<'.'>, int_>,
                                      mp::return_<meta::void_>>;
@@ -145,7 +145,8 @@ namespace frontend
 
         using base = mp::one_of<literal, format_specifier>;
 
-        using format = mp::foldlp<base, base, ir::make::sequence_func>;
+        using format =
+            mp::foldl_start_with_parser<base, base, ir::make::sequence_func>;
     } // detail
 
     using sprintf_parser_func =

@@ -56,10 +56,12 @@ namespace ir
             };
 
             template <typename IR,
-                      template <typename, typename> class Flag,
+                      template <typename, typename, typename...> class Flag,
                       typename Field,
-                      typename Value>
-            struct apply<IR, Flag<Field, Value>> : apply<IR, Field, Value>
+                      typename Value,
+                      typename... Ignored>
+            struct apply<IR, Flag<Field, Value, Ignored...>>
+                : apply<IR, Field, Value>
             {
             };
         };

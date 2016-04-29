@@ -9,7 +9,7 @@
 #include <boost/mpl/void.hpp>
 
 #include "prima/base.hpp" // include before metaparse/string.hpp
-#include <mpllibs/metaparse/string.hpp>
+#include <boost/metaparse/string.hpp>
 
 namespace prima
 {
@@ -26,7 +26,7 @@ namespace meta
     };
 
     using boost::mpl::is_void_;
-    using mpllibs::metaparse::string;
+    using boost::metaparse::string;
     using boost::mpl::true_;
 
     template <unsigned Value>

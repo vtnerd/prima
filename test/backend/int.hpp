@@ -103,7 +103,6 @@ namespace backend
                                   std::numeric_limits<std::int64_t>::max())));
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%06i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<Backend>(
@@ -122,10 +121,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%.0i`");
                 BOOST_TEST_EQ("-9223372036854775808`",
                               (prima::test::generate<Backend>(
@@ -144,10 +141,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%.2i`");
                 BOOST_TEST_EQ("-9223372036854775808`",
                               (prima::test::generate<Backend>(
@@ -156,10 +151,9 @@ namespace backend
                 BOOST_TEST_EQ("-100`",
                               (prima::test::generate_and_system_compare<Backend>(
                                   test_format, -100)));
-                BOOST_TEST_EQ(
-                    "00`",
-                    (prima::test::generate_and_system_compare<test_format,
-                                                              Backend>(0u)));
+                BOOST_TEST_EQ("00`",
+                              (prima::test::generate_and_system_compare<Backend>(
+                                  test_format, 0u)));
                 BOOST_TEST_EQ("100`",
                               (prima::test::generate_and_system_compare<Backend>(
                                   test_format, 100)));
@@ -167,10 +161,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%.5i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<Backend>(
@@ -189,10 +181,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%+.0i`");
                 BOOST_TEST_EQ("-9223372036854775808`",
                               (prima::test::generate<Backend>(
@@ -211,10 +201,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%+.5i`");
                 BOOST_TEST_EQ("-9223372036854775808`",
                               (prima::test::generate<Backend>(
@@ -230,12 +218,11 @@ namespace backend
                               (prima::test::generate_and_system_compare<Backend>(
                                   test_format, 100)));
                 BOOST_TEST_EQ("+9223372036854775807`",
-                              (prima::test::generate<test_format, Backend>(
+                              (prima::test::generate<Backend>(
+                                  test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%+5i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<Backend>(
@@ -254,11 +241,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
-
                 constexpr const auto test_format = PRIMA_FMT("% .0i`");
                 BOOST_TEST_EQ("-9223372036854775808`",
                               (prima::test::generate<Backend>(
@@ -277,10 +261,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("% .5i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<Backend>(
@@ -299,10 +281,8 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%0 6i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<Backend>(
@@ -318,12 +298,11 @@ namespace backend
                               (prima::test::generate_and_system_compare<Backend>(
                                   test_format, 100)));
                 BOOST_TEST_EQ(" 9223372036854775807",
-                              (prima::test::generate<test_format, Backend>(
+                              (prima::test::generate<Backend>(
+                                  test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
             {
-#ifndef PRIMA_TEST_DUPLICATE_ATTRIBUTE_BUG
                 constexpr const auto test_format = PRIMA_FMT("%+06i");
                 BOOST_TEST_EQ("-9223372036854775808",
                               (prima::test::generate<Backend>(
@@ -342,7 +321,6 @@ namespace backend
                               (prima::test::generate<Backend>(
                                   test_format,
                                   std::numeric_limits<std::int64_t>::max())));
-#endif
             }
         }
     } // test

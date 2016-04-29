@@ -13,6 +13,7 @@
 #include <boost/type_traits/is_const.hpp>
 #include <boost/type_traits/is_rvalue_reference.hpp>
 #include <boost/type_traits/remove_const.hpp>
+#include <boost/type_traits/remove_reference.hpp>
 
 #include "prima/meta/base.hpp"
 
@@ -115,6 +116,9 @@ namespace meta
 
     template <typename T>
     using remove_const_t = typename boost::remove_const<T>::type;
+
+    template <typename T>
+    using remove_reference_t = typename boost::remove_reference<T>::type;
 } // meta
 } // prima
 

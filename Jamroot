@@ -1,11 +1,9 @@
 import os ;
 
-local MPLLIBS_PATH = [ os.environ PRIMA_MPLLIBS_PATH ] ;
 local BOOST_PATH = [ os.environ PRIMA_BOOST_PATH ] ;
 
 project prima : requirements
         <include>./include/
-        <include>$(MPLLIBS_PATH)
         <include>$(BOOST_PATH)
         <toolset>clang:<cxxflags>-std=c++1y
         <toolset>darwin:<cxxflags>-std=c++1y
