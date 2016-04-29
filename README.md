@@ -1,12 +1,10 @@
 # prima #
-Prima is an implementation of the C I/O functions that parses the format string at compile time using [Metaparse](https://github.com/sabel83/mpllibs), and then generates input/output formatting code at _compile time_ instead of runtime. This results in [faster](#performance-benchmarks) and safer (type-checked) I/O. Prima supports multiple [backends](#backends) that do the actual I/O, making Prima a flexible C format string compiler.
+Prima is an implementation of the C I/O functions that parses the format string at compile time using [boost::metaparse](https://github.com/boostorg/metaparse), and then generates input/output formatting code at _compile time_ instead of runtime. This results in [faster](#performance-benchmarks) and safer (type-checked) I/O. Prima supports multiple [backends](#backends) that do the actual I/O, making Prima a flexible C format string compiler.
 
 > This library is a work in-progress.
 
 ## Dependencies ##
-Prima currently requires boost 1.42+, and [mpllibs](https://github.com/sabel83/mpllibs). The metaparse portion of mplllibs has been accepted into boost, so prima will drop the separate dependency when that library is merged into boost (hopefully 1.60!). Also, there are a few bugs in `boost::spirit::karma` prior to version 1.60, so some flag combinations will trigger a static assert when older boost releases are detected. Comments in the prima source indicate how karma can be patched to correct these issues.
-
-> **Note:** Metaparse should be included in Boost 1.61. This will become the required version of Boost when it is released, due to the Karma bugs and ease-of-targeting a Boost dependency.
+Prima currently requires Boost 1.61.
 
 ## Supported Formatting ##
 #### Input ####
