@@ -102,12 +102,31 @@ prima::printf.call<prima::backend::karma>()("hello %s"_fmt, "world");
 ## Performance Benchmarks ##
 #### OSX (libc++) - Clang 3.5 - Intel i5-3210M (2.5 GHz 3MB Cache) ####
 ```
-Benchmarking format "%f" with values:
-    0.000000, 100.000000, -100.000000, 1234.123413
-Benchmarking with 1000000 runs each...
-        std::sprintf :  0.892749 microseconds per run {checksum: b626dc0}
-       std::snprintf :  0.894869 microseconds per run {checksum: b626dc0}
-      prima::sprintf :  0.304215 microseconds per run {checksum: b626dc0}
-     prima::snprintf :  0.313224 microseconds per run {checksum: b626dc0}
+Running "%f" with input -100.000000 benchmark 1000000 times for each implementation...
+        std::sprintf :0.231175 microseconds per run {checksum: 3dfd240}
+       std::snprintf :0.230521 microseconds per run {checksum: 3dfd240}
+      prima::sprintf :0.082181 microseconds per run {checksum: 3dfd240}
+     prima::snprintf :0.080238 microseconds per run {checksum: 3dfd240}
+Running "%f" with input 0.000000 benchmark 1000000 times for each implementation...
+        std::sprintf :0.174141 microseconds per run {checksum: 40d9900}
+       std::snprintf :0.171285 microseconds per run {checksum: 40d9900}
+      prima::sprintf :0.062569 microseconds per run {checksum: 40d9900}
+     prima::snprintf :0.068810 microseconds per run {checksum: 40d9900}
+Running "%f" with input 100.000000 benchmark 1000000 times for each implementation...
+        std::sprintf :0.227993 microseconds per run {checksum: 41cdb40}
+       std::snprintf :0.226350 microseconds per run {checksum: 41cdb40}
+      prima::sprintf :0.072780 microseconds per run {checksum: 41cdb40}
+     prima::snprintf :0.072128 microseconds per run {checksum: 41cdb40}
+Running "%f" with input 1234.123413 benchmark 1000000 times for each implementation...
+        std::sprintf :0.257176 microseconds per run {checksum: 41cdb40}
+       std::snprintf :0.256577 microseconds per run {checksum: 41cdb40}
+      prima::sprintf :0.096077 microseconds per run {checksum: 41cdb40}
+     prima::snprintf :0.095936 microseconds per run {checksum: 41cdb40}
+
+Benchmark averages:
+        std::sprintf :0.222621 microseconds per run {checksum: 102721c0}
+       std::snprintf :0.221183 microseconds per run {checksum: 102721c0}
+      prima::sprintf :0.078402 microseconds per run {checksum: 102721c0}
+     prima::snprintf :0.079278 microseconds per run {checksum: 102721c0}
 ```
-> **Note:** This needs to be re-run and updated.
+> **Note:** This is from latest master branch, but not C++11 branch
